@@ -1,18 +1,5 @@
-# api.gouv.fr
-
-[![Build, lint & tests](https://github.com/betagouv/api.gouv.fr/actions/workflows/pre-merge.yml/badge.svg)](https://github.com/betagouv/api.gouv.fr/actions/workflows/pre-merge.yml)
-[![Accessibilité](https://github.com/betagouv/api.gouv.fr/actions/workflows/check-accessibility.yml/badge.svg)](https://github.com/betagouv/api.gouv.fr/actions/workflows/check-accessibility.yml)
-[![Liens morts](https://github.com/betagouv/api.gouv.fr/actions/workflows/check-broken-links.yml/badge.svg)](https://github.com/betagouv/api.gouv.fr/actions/workflows/check-broken-links.yml)
-
-**api.gouv.fr** catalogue les API produites par les administrations centrales, les
-collectivités territoriales, les établissements publics… Chaque API est
-associée à une courte description fonctionnelle, une documentation technique,
-les modalités d'accès, d'éventuelles ressources supplémentaires et surtout des
-liens vers les services qui l'utilisent.
-
-## Derniers déploiements
-
-[![Deploy - Staging](https://github.com/betagouv/api.gouv.fr/actions/workflows/deploy-staging.yml/badge.svg)](https://github.com/betagouv/api.gouv.fr/actions/workflows/deploy-staging.yml)
+# api.vnf.fr
+)](https://github.com/betagouv/api.gouv.fr/actions/workflows/deploy-staging.yml)
 
 [![Deploy - Production](https://github.com/betagouv/api.gouv.fr/actions/workflows/deploy-production.yml/badge.svg)](https://github.com/betagouv/api.gouv.fr/actions/workflows/deploy-production.yml)
 
