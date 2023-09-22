@@ -1,0 +1,279 @@
+openapi: 3.0.0
+info:
+  title: Adresse
+  contact: {}
+  version : "1.0"
+  description: |
+    *Encapsulation de l'API Adresse du gouvernement*. \
+    https://adresse.data.gouv.fr/api-doc/adresse
+    ---
+    
+    ### <font color=#28005F>L'API est composée des routes suivantes :</font>
+    ---------
+    1. Point d’entrée pour le géocodage
+    2. Point d’entrée pour le géocodage de masse à partir d’un fichier CSV.
+    3. Point d’entrée pour le géocodage inverse
+    4. Point d’entrée pour le géocodage inverse de masse à partir d’un fichier CSV.
+
+    ### <font color=#28005F>Securité</font>
+
+    Pour pouvoir effectuer des appels à l'API, il est nécessaire de s'authentifier en Basic authentification
+servers:
+- url: http://01sviam-prep1/adresse/
+  variables: {}
+paths :
+  /search/:
+    get:
+      security:
+        - basicAuth: []
+      tags:
+        - Adresse
+      summary: géocodage
+      description: Point d’entrée pour le géocodage
+      operationId: rechercheAdresse
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+            description : "recherche plein texte"
+            example : "8 bd du port"
+          required: true
+          allowReserved: true
+        - in: query
+          name: limit
+          schema:
+            type: string
+            description : "nombre d’éléments retournés"
+            example : 15
+        - in: query
+          name: autocomplete
+          schema:
+            type: boolean
+            description : "désactivation des traitements d’auto-complétion"
+        - in: query
+          name: lat
+          schema:
+            type: string
+            description : "latitude"
+            example : 48.789
+        - in: query
+          name: lon
+          schema:
+            type: string
+            description : "longitude"
+            example : 2.789
+        - in: query
+          name: type
+          schema:
+            $ref: '#/components/schemas/type'
+        - in: query
+          name: postcode
+          schema:
+            type: string
+            description : "code postal"
+            example : 44380
+        - in: query
+          name: citycode
+          schema:
+            type: string
+            description : "code INSEE"
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reponse'
+                
+  /search/csv:
+    post:
+      security:
+        - basicAuth: []
+      tags:
+        - Adresse
+      summary: géocodage CSV
+      description: |
+        Point d’entrée pour le géocodage de masse à partir d’un fichier CSV. \
+        exemple de CSV : https://adresse.data.gouv.fr/exemples/search.csv
+      operationId: searchCSV
+      requestBody:
+        description: ''
+        content:
+          application/x-www-form-urlencoded :
+            schema :
+              $ref: '#/components/schemas/searchCSV'
+      responses:
+        '200':
+          description: | 
+            texte de CSV avec les colonnes : \
+            nom,adresse,postcode,city,latitude,longitude,result_label,result_score,result_type,result_id,result_housenumber,result_name,result_street,result_postcode,result_city,result_context,result_citycode,result_oldcitycode,result_oldcity,result_district
+  
+  /reverse/:
+    get:
+      security:
+        - basicAuth: []
+      tags:
+        - Adresse
+      summary: géocodage inverse
+      description: Point d’entrée pour le géocodage inverse
+      operationId: reverse
+      parameters:
+        - in: query
+          name: lat
+          schema:
+            type: string
+            description : "latitude"
+          required: true
+        - in: query
+          name: lon
+          schema:
+            type: string
+            description : "longitude"
+          required: true
+        - in: query
+          name: type
+          schema:
+            $ref: '#/components/schemas/type'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reponse'
+  
+  /reverse/csv/:
+    post:
+      security:
+        - basicAuth: []
+      tags:
+        - Adresse
+      summary: géocodage inverse CSV
+      description: |
+        Point d’entrée pour le géocodage inverse de masse à partir d’un fichier CSV. \
+        exemple de CSV : https://adresse.data.gouv.fr/exemples/reverse.csv
+      operationId: reverseCSV
+      requestBody:
+        description: ''
+        content:
+          application/x-www-form-urlencoded :
+            schema :
+              type: object
+              properties:
+                data :
+                  type : string
+                  description: chemin du fichier CSV
+      responses:
+        '200':
+          description: | 
+                  texte de CSV avec les colonnes : \
+                  lat,lon,name,result_latitude,result_longitude,result_label,result_distance,result_type,result_id,result_housenumber,result_name,result_street,result_postcode,result_city,result_context,result_citycode,result_oldcitycode,result_oldcity,result_district
+
+components:
+  securitySchemes:
+    basicAuth:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: basic
+  schemas:
+    Reponse :
+     type: object
+     properties:
+        id :
+          type: string
+          description: identifiant de l’adresse (clef d’interopérabilité)
+        type :
+          $ref: '#/components/schemas/type'
+        score :
+          type: string
+          description: valeur de 0 à 1 indiquant la pertinence du résultat
+        housenumber :
+          type: string
+          description: numéro avec indice de répétition éventuel (bis, ter, A, B)
+        street :
+          type: string
+          description: nom de la voie
+        name :
+          type: string
+          description: numéro éventuel et nom de voie ou lieu dit
+        postcode :
+          type: string
+          description: code postal
+        citycode :
+          type: string
+          description: code INSEE de la commune
+        city :
+          type: string
+          description: nom de la commune
+        district :
+          type: string
+          description: nom de l’arrondissement (Paris/Lyon/Marseille)
+        oldcitycode :
+          type: string
+          description: code INSEE de la commune ancienne (le cas échéant)
+        oldcity :
+          type: string
+          description: nom de la commune ancienne (le cas échéant)
+        context :
+          type: string
+          description: n° de département, nom de département et de région
+        label :
+          type: string
+          description: libellé complet de l’adresse
+        x :
+          type: string
+          description: coordonnées géographique en projection légale
+        y :
+          type: string
+          description: coordonnées géographique en projection légale
+        importance :
+          type: string
+          description: indicateur d’importance (champ technique)
+    
+    searchCSV:
+     type: object
+     properties:
+      data :
+        type : string
+        description: chemin du fichier CSV
+      columns :
+        type: array
+        items:
+          type : string
+        description : les colonnes à utiliser
+      citycode :
+        type : string
+        description :  le nom d’une colonne contenant le code INSEE
+      postcode :
+        type : string
+        description :  le nom d’une colonne contenant le code Postal
+      result_columns :
+        type: array
+        items:
+          type : string
+        description :   les champs attendus dans la réponse
+     required :
+      - data
+
+    type:
+      type: string
+      enum :
+        - housenumber
+        - street
+        - locality
+        - municipality
+      description: |
+        housenumber : numéro « à la plaque » \
+        street : position « à la voie », placé approximativement au centre de celle-ci\
+        locality : lieu-dit\
+        municipality : numéro « à la commune »
+
+tags:
+- name: Adresse
+  description: ''
+security:
+  - basicAuth: []
+x-headmatter:
+  readable_by:
+    - admin
+    - Adresse

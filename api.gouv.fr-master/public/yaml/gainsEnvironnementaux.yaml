@@ -1,0 +1,91 @@
+openapi: 3.0.0
+info:
+  title: Gains environnementaux
+  contact: {}
+  version: '1.0'
+servers:
+- url: http://01SVIAM-PREP1/ws/environnement
+  variables: {}
+paths:
+  /gains:
+    post:
+      security:
+        - basicAuth: []
+      summary: gainsenvironnementaux
+      description: gains environnementaux
+      operationId: gainsenvironnementaux
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/gainsenvironnementauxrequest'
+            example:
+              dateDebut: 2020-01-01T00:00:00Z
+              dateFin: 2020-12-21T15:00:00Z
+              nbJoursDecalage: 0
+              troncons:
+              - TRH000142134
+              - TRH000143210
+              - TRH000143209
+              - TRH000143419
+              - TRH000143206
+              - TRH000147277
+              - TRH000147278
+              - TRH000143072
+              - TRH000143211
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content: {}
+      deprecated: false
+components:
+  securitySchemes:
+    basicAuth:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: basic
+  schemas:
+    gainsenvironnementauxrequest:
+      title: gainsenvironnementauxrequest
+      required:
+      - dateDebut
+      - dateFin
+      - nbJoursDecalage
+      - troncons
+      type: object
+      properties:
+        dateDebut:
+          type: string
+        dateFin:
+          type: string
+        nbJoursDecalage:
+          type: integer
+          format: int32
+        troncons:
+          type: array
+          items:
+            type: string
+          description: ''
+      example:
+        dateDebut: 2020-01-01T00:00:00Z
+        dateFin: 2020-12-21T15:00:00Z
+        nbJoursDecalage: 0
+        troncons:
+        - TRH000142134
+        - TRH000143210
+        - TRH000143209
+        - TRH000143419
+        - TRH000143206
+        - TRH000147277
+        - TRH000147278
+        - TRH000143072
+        - TRH000143211
+tags: []
+security:
+  - basicAuth: []
+x-headmatter:
+  readable_by:
+    - admin

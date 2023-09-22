@@ -1,0 +1,394 @@
+openapi: 3.0.0
+info:
+  title: Declaration Voyages
+  contact: {}
+  version: '1.0'
+  description: |
+    *Cette API permet les échanges avec le service VELI*.
+
+    ---
+    
+    ### <font color=#28005F>L'API est composée de 3 routes :</font>
+    ---------
+    1. Récupération d'une déclaration au format Veli 
+    2. Récupération d'une déclaration au format ERINOT 
+    3. Envoi d'une déclaration sur FTP 
+
+    ### <font color=#28005F>Securité</font>
+
+    Pour pouvoir effectuer des appels à l'API, il est nécessaire de s'authentifier sour le protocole Basic authentification
+servers:
+- url: http://01SVIAM-PREP1/declaration
+  variables: {}
+paths:
+  /recherche:
+    post:
+      tags:
+      - Declaration
+      summary: RechercheDeclarationErinot
+      operationId: RechercheDeclarationErinot
+      parameters:
+      - name: Accept
+        in: header
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: application/json
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RechercheDeclarationErinotRequest'
+            example:
+              numeroVoyage: '123456'
+              eni: '789'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+      - basic: []
+  /veli:
+    post:
+      tags:
+      - Declaration
+      summary: RechercheDeclarationVeli
+      operationId: RechercheDeclarationVeli
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RechercheDeclarationVeliRequest'
+            example:
+              numeroVoyage: '123456'
+              dateDebut: 2022-06-22T13:00:00Z
+              dateFin: 2022-06-23T14:00:00Z
+              nbResultatsMax: 0
+              rechercheVoyages: true
+              rechercheVoyagesDemat: true
+              rechercheAutreBateau: false
+              bateau:
+                eni: '789456123'
+                matricule: matBateau
+                matriculeMdm: matMdm
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+      - basic: []
+  /envoi:
+    post:
+      tags:
+      - Declaration
+      summary: EnvoiDeclaration
+      operationId: EnvoiDeclaration
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnvoiDeclarationRequest'
+            example:
+              numeroDeclaration: DEM64
+              paysDepartCode: '001'
+              paysDepartLibelle: France
+              quaiDepartCode: '11571'
+              quaiDepartLibelle: CAMPAGNE
+              paysArriveeCode: '001'
+              paysArriveeLibelle: France
+              quaiArriveeCode: '11591'
+              quaiArriveeLibelle: LANGUEVOISIN
+              dateDepart: 2022-06-14T20:29:08Z
+              dateArrivee: 2022-06-07T22:00:00Z
+              bateau:
+                eni: '01823032'
+                matricule: 'P16722  '
+                matriculeMdm: P16722
+                idMdm: '1907'
+                devise: SAMOEN
+                portLourd: 2302
+                codePays: '001'
+                proprietaire: CFT GAZ null
+                longueur: 40
+                largeur: 50
+                tirantAir: 60
+                tirantEau: 70
+                idCategorie: '1'
+              transports:
+              - codeNST: '6399 '
+                libelleMarchandise: TERRES POUR REMBLAIS ET PRODUITS DE DEMOLITIONS INERTES
+                tonnage: 111
+                chgPlaceId: '11571'
+                chgPlaceLabel: CAMPAGNE
+                deChgPlaceId: '11591'
+                deChgPlaceLabel: LANGUEVOISIN
+                matiereDangereuse: false
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+      - basic: []
+components:
+  schemas:
+    RechercheDeclarationErinotRequest:
+      title: RechercheDeclarationErinotRequest
+      required:
+      - numeroVoyage
+      - eni
+      type: object
+      properties:
+        numeroVoyage:
+          type: string
+        eni:
+          type: string
+      example:
+        numeroVoyage: '123456'
+        eni: '789'
+    RechercheDeclarationVeliRequest:
+      title: RechercheDeclarationVeliRequest
+      required:
+      - numeroVoyage
+      - dateDebut
+      - dateFin
+      - nbResultatsMax
+      - rechercheVoyages
+      - rechercheVoyagesDemat
+      - rechercheAutreBateau
+      - bateau
+      type: object
+      properties:
+        numeroVoyage:
+          type: string
+        dateDebut:
+          type: string
+        dateFin:
+          type: string
+        nbResultatsMax:
+          type: integer
+          format: int32
+        rechercheVoyages:
+          type: boolean
+        rechercheVoyagesDemat:
+          type: boolean
+        rechercheAutreBateau:
+          type: boolean
+        bateau:
+          $ref: '#/components/schemas/Bateau'
+      example:
+        numeroVoyage: '123456'
+        dateDebut: 2022-06-22T13:00:00Z
+        dateFin: 2022-06-23T14:00:00Z
+        nbResultatsMax: 0
+        rechercheVoyages: true
+        rechercheVoyagesDemat: true
+        rechercheAutreBateau: false
+        bateau:
+          eni: '789456123'
+          matricule: matBateau
+          matriculeMdm: matMdm
+
+    EnvoiDeclarationRequest:
+      title: EnvoiDeclarationRequest
+      required:
+      - numeroDeclaration
+      - paysDepartCode
+      - paysDepartLibelle
+      - quaiDepartCode
+      - quaiDepartLibelle
+      - paysArriveeCode
+      - paysArriveeLibelle
+      - quaiArriveeCode
+      - quaiArriveeLibelle
+      - dateDepart
+      - dateArrivee
+      - bateau
+      - transports
+      type: object
+      properties:
+        numeroDeclaration:
+          type: string
+        paysDepartCode:
+          type: string
+        paysDepartLibelle:
+          type: string
+        quaiDepartCode:
+          type: string
+        quaiDepartLibelle:
+          type: string
+        paysArriveeCode:
+          type: string
+        paysArriveeLibelle:
+          type: string
+        quaiArriveeCode:
+          type: string
+        quaiArriveeLibelle:
+          type: string
+        dateDepart:
+          type: string
+        dateArrivee:
+          type: string
+        bateau:
+          $ref: '#/components/schemas/Bateau'
+        transports:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transport'
+          description: ''
+      example:
+        numeroDeclaration: DEM64
+        paysDepartCode: '001'
+        paysDepartLibelle: France
+        quaiDepartCode: '11571'
+        quaiDepartLibelle: CAMPAGNE
+        paysArriveeCode: '001'
+        paysArriveeLibelle: France
+        quaiArriveeCode: '11591'
+        quaiArriveeLibelle: LANGUEVOISIN
+        dateDepart: 2022-06-14T20:29:08Z
+        dateArrivee: 2022-06-07T22:00:00Z
+        bateau:
+          eni: '01823032'
+          matricule: 'P16722  '
+          matriculeMdm: P16722
+          idMdm: '1907'
+          devise: SAMOEN
+          portLourd: 2302
+          codePays: '001'
+          proprietaire: CFT GAZ null
+          longueur: 40
+          largeur: 50
+          tirantAir: 60
+          tirantEau: 70
+          idCategorie: '1'
+        transports:
+        - codeNST: '6399 '
+          libelleMarchandise: TERRES POUR REMBLAIS ET PRODUITS DE DEMOLITIONS INERTES
+          tonnage: 111
+          chgPlaceId: '11571'
+          chgPlaceLabel: CAMPAGNE
+          deChgPlaceId: '11591'
+          deChgPlaceLabel: LANGUEVOISIN
+          matiereDangereuse: false
+    Bateau:
+      title: Bateau
+      required:
+      - eni
+      - matricule
+      - matriculeMdm
+      - idMdm
+      - devise
+      - portLourd
+      - codePays
+      - proprietaire
+      - longueur
+      - largeur
+      - tirantAir
+      - tirantEau
+      - idCategorie
+      type: object
+      properties:
+        eni:
+          type: string
+        matricule:
+          type: string
+        matriculeMdm:
+          type: string
+        idMdm:
+          type: string
+        devise:
+          type: string
+        portLourd:
+          type: integer
+          format: int32
+        codePays:
+          type: string
+        proprietaire:
+          type: string
+        longueur:
+          type: integer
+          format: int32
+        largeur:
+          type: integer
+          format: int32
+        tirantAir:
+          type: integer
+          format: int32
+        tirantEau:
+          type: integer
+          format: int32
+        idCategorie:
+          type: string
+      example:
+        eni: '01823032'
+        matricule: 'P16722  '
+        matriculeMdm: P16722
+        idMdm: '1907'
+        devise: SAMOEN
+        portLourd: 2302
+        codePays: '001'
+        proprietaire: CFT GAZ null
+        longueur: 40
+        largeur: 50
+        tirantAir: 60
+        tirantEau: 70
+        idCategorie: '1'
+    Transport:
+      title: Transport
+      required:
+      - codeNST
+      - libelleMarchandise
+      - tonnage
+      - chgPlaceId
+      - chgPlaceLabel
+      - deChgPlaceId
+      - deChgPlaceLabel
+      - matiereDangereuse
+      type: object
+      properties:
+        codeNST:
+          type: string
+        libelleMarchandise:
+          type: string
+        tonnage:
+          type: integer
+          format: int32
+        chgPlaceId:
+          type: string
+        chgPlaceLabel:
+          type: string
+        deChgPlaceId:
+          type: string
+        deChgPlaceLabel:
+          type: string
+        matiereDangereuse:
+          type: boolean
+      example:
+        codeNST: '6399 '
+        libelleMarchandise: TERRES POUR REMBLAIS ET PRODUITS DE DEMOLITIONS INERTES
+        tonnage: 111
+        chgPlaceId: '11571'
+        chgPlaceLabel: CAMPAGNE
+        deChgPlaceId: '11591'
+        deChgPlaceLabel: LANGUEVOISIN
+        matiereDangereuse: false
+  securitySchemes:
+    basic:
+      type: http
+      scheme: basic
+security: []
+tags:
+- name: Declaration

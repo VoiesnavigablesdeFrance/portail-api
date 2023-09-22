@@ -1,0 +1,103 @@
+openapi: 3.0.0
+info:
+  title: Observado
+  contact: {}
+  version: '1.0'
+servers:
+- url: http://01sviam-prep1/observado
+  variables: {}
+paths:
+  /getFeature:
+    get:
+      tags:
+      - API
+      summary: observado
+      description: get feature
+      operationId: observado
+      parameters:
+      - name: service
+        in: query
+        description: ''
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: WFS
+      - name: version
+        in: query
+        description: ''
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: 1.0.0
+      - name: request
+        in: query
+        description: ''
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: GetFeature
+      - name: typeName
+        in: query
+        description: ''
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: terrain
+      - name: maxFeatures
+        in: query
+        description: ''
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: '50'
+      - name: outputFormat
+        in: query
+        description: ''
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: application/json
+      - name: cqlFilter
+        in: query
+        description: ''
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: id=2
+      - name: Content-Type
+        in: header
+        description: ''
+        required: true
+        style: simple
+        schema:
+          enum:
+          - application/json
+          type: string
+          example: application/json
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content: {}
+      deprecated: false
+tags:
+- name: API
+  description: ''
+x-headmatter:
+  readable_by:
+    - admin
+    - observado

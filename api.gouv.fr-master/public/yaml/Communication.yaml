@@ -1,0 +1,215 @@
+openapi: 3.0.0
+info:
+  title: Communication
+  contact: {}
+  version: '1.0'
+  description: |
+    *L'API de Communication permet d'envoyer des emails et des SMS.
+
+    ---
+    
+    ### <font color=#28005F>L'API est composée des routes suivantes :</font>
+    ---------
+    1. Envoi d'email
+    2. Lecture de lien
+    3. Envoi de SMS
+
+    ### <font color=#28005F>Securité</font>
+
+    Pour pouvoir effectuer des appels à l'API, il est nécessaire de s'authentifier en Basic authentification
+servers:
+- url: http://01sviam-prep1/communication
+  variables: {}
+paths:
+  /mail:
+    post:
+      security:
+        - basicAuth: []
+      tags:
+      - Communication
+      summary: Envoi d'email
+      description: |
+        ##### Paramètres : 
+        **sujet** : [1]\
+        Sujet du mail à envoyer.\
+        **expediteur** : \
+        Adresse mail d'envoi (doit être renseigné dans le portail de Sendethic).\
+        **nomAffiche** : \
+        Nom affiché à côté de l'adresse mail d'envoi.\
+        **emailReponse** : \
+        Adresse mail de réception des réponses.\
+        **html** : \
+        Contenu du message.\
+        **destinataire** : [1]\
+        Destinataire du mail (email et nom).\
+        **application** : [1]\
+        Nom de l’application à qui envoyer la notification une fois le mail envoyé.\
+        **lien** : \
+        objet lien pour insérer un lien dans le mail.\
+        \
+        [1] Obligatoire
+
+
+      operationId: mail
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/mail'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema : {}
+              example :
+                  codeRetour : "OK"
+                  codeStatus : 200
+    
+  /document/{token}:
+    get:
+      security:
+        - basicAuth: []
+      tags:
+      - Communication
+      summary: lecture de lien
+      operationId: LectureLien
+      parameters:
+      - name: token
+        in: path
+        description: token du lien
+        required : true
+        schema:
+          type: string
+          example: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJodHRwOi8vMTI3LjAuMC4xOjUyNzczL3dzcmVzdC9hcGkvZ2VkL2RvY3VtZW50L1dDRE9DVU1FTlRTXzE3OTA4NSIsImlhdCI6MTY3MjY2MDAwMX0.kT8FnLSMmQTORlqEWefX3UQQdTdE5-IO9Xn2tkGlhmk'
+      responses:
+        '200' :
+          description: ok
+          content:
+            application/json:
+              schema : {}
+              example :
+                  codeRetour : "OK"
+                  codeStatus : 200
+
+
+  /sms:
+    post:
+      security:
+        - basicAuth: []
+      tags:
+      - Communication
+      summary: Envoi de SMS
+      description: |
+        ##### Paramètres : 
+        **oadc** : [1]\
+        Le nom de l'émetteur\
+        (apparaissant comme expéditeur du SMS sur le téléphone des destinataires).\
+        **message** : \
+        Contenu du message.\
+        **destinataires** : [1]\
+        Liste des numéro de téléphone des destinataires.\
+        Les numéros doivent être précédés d’un indicateur de pays (+33 pour la France).
+        **dateHeure ** : \
+        Date et heure d’envoi.\
+        \
+        [1] Obligatoire
+
+
+      operationId: sms
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/sms'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema : {}
+              example :
+                  codeRetour : "OK"
+                  codeStatus : 200
+
+
+components:
+  securitySchemes:
+    basicAuth:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: basic
+  schemas:
+    mail:
+      type: object
+      properties:
+        sujet:
+          type: string
+        expediteur :
+          type: string
+        nomAffiche :
+          type: string
+        emailReponse :
+          type: string
+        html :
+          type: string
+        destinataire:
+          $ref: '#/components/schemas/destinataire'
+      example:
+        sujet : "[Test envoi mail] mail depuis Kong"
+        expediteur : "no-reply@voiesnavigablesdefrance.fr"
+        nomAffiche : "VNF"
+        emailReponse : "no-reply@voiesnavigablesdefrance.fr"
+        html : "Ceci est un message de test avec un lien. %link%"
+        destinataires : {
+            email : corentin.blondeau@cgi.com",
+            nom": "Corentin BLONDEAU"
+            }
+        lien : {
+            href : "http://127.0.0.1:52773/wsrest/api/ged/document/WCDOCUMENTS_179084",
+            titre : "clique",
+            delai : "1000",
+            placeholder : "%link%"
+            }
+        
+    destinataire:
+        type : object
+        properties:
+            email :
+                type: string
+            nom :
+                type: string
+
+
+    sms:
+      type: object
+      properties:
+        oadc :
+          type: string
+        message :
+          type: string
+        destinataires :
+          type: array
+          items:
+            type: string
+        dateHeure :
+          type: string
+      example:
+        oadc : "VNF"
+        message : "Ceci est un message de test."
+        destinataires : [ "+33617875691"]
+        dateHeure : "25/08/2022 17:30:00"
+    
+      
+tags:
+- name: Communication
+  description: ''
+security:
+  - basicAuth: []
+x-headmatter:
+  readable_by:
+    - admin
+    - Communication

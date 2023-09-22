@@ -1,0 +1,116 @@
+openapi: 3.0.0
+info:
+  title: Editique
+  contact: {}
+  version: '1.0'
+  description: |
+    *Cette API sert de passe-plat de l'API Editique*.
+
+    ---
+    
+    ### <font color=#28005F>L'API est composée des routes suivantes :</font>
+    ---------
+    1. Génération de document
+
+    ### <font color=#28005F>Securité</font>
+
+    Pour pouvoir effectuer des appels à l'API, il est nécessaire de s'authentifier en Basic authentification
+servers:
+- url: http://01sviam-prep1/editique/api/documents/export/
+  variables: {}
+paths:
+  /generatePdfWithAttributeValues:
+    post:
+      security:
+        - basicAuth: []
+      tags:
+      - Editique
+      summary: Génération de document
+      description: |
+        ##### Paramètres : 
+        **code** : [1]\
+        Code du document à générer.\
+        **data** : [1]\
+        Données saisies et issues du système d’information (Sous forme de données clé/valeur).\
+        **effective_date** : \
+        Date d’effet, permet de récupérer la version du paragraphe actif à cette date.\
+        Si non renseigné, prise en compte de la date du jour.\
+        **watermark** : \
+        Filigrane, permet l’affichage d’un filigrane sur le document.\
+        **format** : [1]\
+        Format de sortie souhaité.\
+        **footer** : \
+        Pied de page.\
+        Si renseigné, le nom du document sera affiché en pied de page.\
+        Si non renseigné, le numéro de page sera affiché.\
+        \
+        [1] Obligatoire
+
+
+      operationId: generatedoc
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/generatedoc'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema : {}
+              example :
+                  codeRetour : "OK"
+                  codeStatus : 200
+
+components:
+  securitySchemes:
+    basicAuth:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: basic
+  schemas:
+    generatedoc:
+      type: object
+      properties:
+        code:
+          type: string
+        data:
+          $ref: '#/components/schemas/data'
+        effective_date:
+          type: string
+        watermark:
+          type: string
+        format:
+          type: string
+        footer:
+          type: string
+      example:
+        code : "TEST_IMPRESSION_GEDO"
+        data : {
+          "LABEL_MODELE_ACTE": "COP15",
+          "client_prenom": "Kevin"
+          }
+        effective_date: "DD/MM/YYYY"
+        watermark: "Simulation"
+        format: "PDF"
+        footer: "nom du document"
+
+    data:
+      type: object
+      properties:
+        LABEL_MODELE_ACTE:
+          type: string
+        client_prenom:
+          type: string
+    
+tags:
+- name: Editique
+  description: ''
+security:
+  - basicAuth: []
+x-headmatter:
+  readable_by:
+    - admin
+    - Editique

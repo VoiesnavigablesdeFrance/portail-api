@@ -1,0 +1,124 @@
+openapi: 3.0.0
+info:
+  title: API Bateaux
+  contact: {}
+  version: '1.0'
+  description: |
+    *Cette API permet de rechercher des bateaux de voyages, de plaisance et de services*.
+
+    ---
+    
+    ### <font color=#28005F>L'API est composée de 2 routes :</font>
+    ---------
+    1. Récupération de bateaux de voyages, de plaisance et de services
+    2. Récupération des différentes catégories de bateaux
+
+    ### <font color=#28005F>Securité</font>
+
+    Pour pouvoir effectuer des appels à l'API, il est nécessaire de s'authentifier sour le protocole Basic authentification
+servers:
+- url: http://01SVIAM-PREP1/bateaux
+  variables: {}
+paths:
+  /categories:
+    get:
+      tags:
+      - Bateaux
+      summary: CategoriesBateaux
+      operationId: CategoriesBateaux
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+      - basic: []
+  /recherche:
+    post:
+      tags:
+      - Bateaux
+      summary: RechercherBateaux
+      operationId: RechercherBateaux
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RechercherBateauxRequest'
+            example:
+              Source: Source
+              Devise: Devise
+              NumEni: NumEni
+              Matricule: Matricule
+              IdTechnique: IdTechnique
+              Nom: Nom
+              Email: Email
+              Siret: Siret
+              Page: 1
+              Nombre_item: 5
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+      - basic: []
+components:
+  schemas:
+    RechercherBateauxRequest:
+      title: RechercherBateauxRequest
+      required:
+      - Source
+      - Devise
+      - NumEni
+      - Matricule
+      - IdTechnique
+      - Nom
+      - Email
+      - Page
+      - Nombre_item
+      type: object
+      properties:
+        Source:
+          type: string
+        Devise:
+          type: string
+        NumEni:
+          type: string
+        Matricule:
+          type: string
+        IdTechnique:
+          type: string
+        Nom:
+          type: string
+        Email:
+          type: string
+        Siret:
+          type: string
+        Page:
+          type: integer
+          format: int32
+        Nombre_item:
+          type: integer
+          format: int32
+      example:
+        Source: Source
+        Devise: Devise
+        NumEni: NumEni
+        Matricule: Matricule
+        IdTechnique: IdTechnique
+        Nom: Nom
+        Email: Email
+        Siret: Siret
+        Page: 1
+        Nombre_item: 5
+  securitySchemes:
+    basic:
+      type: http
+      scheme: basic
+security: []
+tags:
+- name: Bateaux

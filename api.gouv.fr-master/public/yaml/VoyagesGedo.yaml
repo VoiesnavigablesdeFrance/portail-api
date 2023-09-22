@@ -1,0 +1,122 @@
+openapi: 3.0.0
+info:
+  title: API VoyagesGedo
+  contact: {}
+  version: '1.0'
+  description: |
+    *Cette API permet de récuperer les quais actifs en fonction d'un code ou un libelle quai ainsi que le tonnage en fonction d'un  code de quai et d'une date de début et de fin*.
+
+    ---
+    
+    ### <font color=#28005F>L'API est composée de 2 routes :</font>
+    ---------
+    1. Récupération des quais actifs en fonction d'un code de quai ou d'un libelle de quai
+    2. Récupération d'un tonnage en fonction d'un code quai, d'une date de début et d'une date de fin
+
+    ### <font color=#28005F>Securité</font>
+
+    Pour pouvoir effectuer des appels à l'API, il est nécessaire de s'authentifier sour le protocole Basic authentification
+servers:
+- url: http://01SVIAM-PREP1/Voyages
+  variables: {}
+paths:
+  /QuaisActifs:
+    post:
+      tags:
+      - VoyagesGedo
+      summary: GetQuaisActifs
+      operationId: GetQuaisActifs
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/GetQuaisActifsRequest'
+              - example:
+                  codeQuai: code
+                  libelleQuai: libelle
+            example:
+              codeQuai: code
+              libelleQuai: libelle
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+      - basic: []
+  /Tonnage:
+    post:
+      tags:
+      - VoyagesGedo
+      summary: GetTonnage
+      operationId: GetTonnage
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/GetTonnageRequest'
+              - example:
+                  codeQuai: '01565'
+                  dateDeb: 01/12/02
+                  dateFin: 01/01/03
+            example:
+              codeQuai: '01565'
+              dateDeb: 01/12/02
+              dateFin: 01/01/03
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+      - basic: []
+components:
+  schemas:
+    GetQuaisActifsRequest:
+      title: GetQuaisActifsRequest
+      required:
+      - codeQuai
+      - libelleQuai
+      type: object
+      properties:
+        codeQuai:
+          type: string
+        libelleQuai:
+          type: string
+      example:
+        codeQuai: code
+        libelleQuai: libelle
+    GetTonnageRequest:
+      title: GetTonnageRequest
+      required:
+      - codeQuai
+      - dateDeb
+      - dateFin
+      type: object
+      properties:
+        codeQuai:
+          type: string
+        dateDeb:
+          type: string
+        dateFin:
+          type: string
+      example:
+        codeQuai: '01565'
+        dateDeb: 01/12/02
+        dateFin: 01/01/03
+  securitySchemes:
+    basic:
+      type: http
+      scheme: basic
+security: []
+tags:
+- name: VoyagesGedo
+  description: ''

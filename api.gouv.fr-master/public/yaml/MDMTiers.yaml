@@ -1,0 +1,2362 @@
+# ==============================================================
+# Swagger MDM Tiers                                             
+# --------------------------------------------------------------
+# Initialisé par : Guilaumme LEPRÊTRE                           
+# Dernière modification :                                       
+#   Lucas MACORI : 26/12/2022                                   
+#   Corrections suite aux retours de VNF et MAJ suite aux       
+#   différentes évolutions développées.                         
+#   Restructuration et ajout de commentaires pour la lisibilité 
+# ==============================================================
+
+# ==============================================================
+# Entête du document
+# ==============================================================
+openapi: 3.0.0
+info:
+  title: MDM Tiers
+  contact: {}
+  version: "1.0"
+  description: |
+    *Cette API permet les échanges avec le MDM Tiers*.
+
+    ---
+    ### <font color=#28005F>L'API est composée de différentes routes permettant de  :</font>
+    ---
+    1. Réaliser le CRUD d'un tiers 
+    2. Réaliser le CRUD sur les sous objets du Tiers (Adresse, Email, Activité et Télephone) en mode delta 
+    4. Rerchercher des tiers selon plusieurs critères 
+
+    ### <font color=#28005F>Securité</font>
+
+    Pour pouvoir effectuer des appels à l'API, il est nécessaire de s'authentifier en Basic auth.
+    Cependant, pour l'API exposé en externe, l'authentification se fait via une clé API gérée par l'API Manager (InterSystems API Manager : KONG).
+
+    Cette authentification est liée à un consommateur qui est lui-même lié à une source dans le MDM Tiers (ROWIDSystem). \
+    *Par exemple*: **GEDO**, **PAMI**
+servers:
+  - url: http://01sviam-prep1/mdm
+    variables: {}
+
+# ==============================================================
+# Description des routes
+# ==============================================================
+
+# --------------------------------------------------------------
+# Gestion des tiers
+# --------------------------------------------------------------
+paths:
+  /tiers/{rowIDTiers}:
+    parameters:
+      - name: rowIDTiers
+        in: path
+        description: Identifiant MDM du Tiers
+        required: true
+        schema:
+          type: string
+
+    # Récupération tiers
+    get:
+      tags:
+        - Tiers
+      summary: Récupération d'un Tiers par son identifiant MDM
+      description: Recupération d'un Tiers
+      operationId: getTiers
+
+      responses:
+        "200":
+          description: ""
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "OK":
+                  description: "OK"
+                  value:
+                    codeRetour: "OK"
+                "Tiers inexistant":
+                  description: "KO"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Aucun Tiers avec le rowIDObject : {RowIDObject}"
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la récupération du tiers avec le status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+      deprecated: false
+      security:
+        - basic: []
+
+    # Modification tiers
+    put:
+      tags:
+        - Tiers
+      summary: Modification d'un Tiers
+      description: |
+        Modification d'un Tiers
+        ---  
+        ## Informations
+        Le champ SRC_KEY ne peut être modifié, il est uniquement initialisé à la création du tiers. \
+        Certains champs peuvent être écrasés par l'API SIREN (voir liste ci-dessus). \
+        
+        Consultez le schéma pour afficher les exemples de valeur pour chaque paramètre.
+      operationId: putTiers
+      requestBody:
+        description: |
+          **pivotMDMTiers** :
+          Objet du tiers à modifier \
+          *Au moins l'un des champs doit être fourni*
+          - **TYP_TIERS** (*typeTiers.code*) : Type de tiers (Physique, Morale)
+          - **INFO_CPTL_TIERS** (*infoCptl.code*) : Code informations comptables du tiers
+          - **CIV_TIERS** (*civilite.code*) : Civilité (pour une personne physique)
+          - **NOM_TIERS** (*phyNom*) : Nom du Tiers (pour une personne physique)
+          - **PRNM_TIERS** (*phyPrnm*) : Prénom du Tiers (pour une personne physique)
+          - **DATE_NAISS_TIERS** (*phyDteDeNais*) : Date de naissance du Tiers (pour une personne physique)
+          - **LIEU_NAISS_TIERS** (*phyLieuDeNais*) : Lieu de naissance du tiers (pour une personne physique)
+          - **NATN_TIERS** (*defNatn.geoCode*) : Lieu de naissance du tiers (pour une personne physique)
+          - **MAT_AGENT_TIERS** (*agentMat*) : Matricule agent (Identifiant provenant du MDM Tiers) du tiers (pour un agent de VNF) **(Peut être écrasé par le MDM RH)**
+          - **SIRET_TIERS** (*siret*) : SIRET du tiers (pour une personne morale ou personne physique avec SIRET)
+          - **SIREN_TIERS** (*siren*) : SIREN du tiers (pour une personne morale ou personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **CODE_CAT_TIERS** (*categorieTier.code*) : Code catégorie du tiers (correpond à un code stocké dans le référentiel)
+          - **CATEGORIE_JURIDIQUE** (*catJuridique.code*) : Catégorie juridique du tiers (correspond à un code stocké dans le référentiel, code INSEE) **(Peut être écrasé par l'API SIREN)**
+          - **DENOM_USU_TIERS** (*denomUsuelle*) : Dénomination usuelle du tiers (pour une personne morale ou personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **SIEGE_TIERS** (*etablissementSiege.code*) : Lieu du siege du tiers (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **RCS_TIERS** (*morRcs*) : Numéro du Registre du Commerce des Sociétés (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **RSOCL_TIERS** (*morRaisSocl*) : Raison sociale du tiers (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **IMMAT_ETRAN_TIERS** (*immatEtran*) : Immatriculation étrangère du tiers (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **IMMAT_RNA** (*immatRna*) : Immatriculation au Répertoire National des Associations **(Peut être écrasé par l'API SIREN)**
+          - **SIGLE_TIERS** (*sigle*) : Sigle du tiers (pour une personne morale ou une personne physique avec **SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **TVA_INTR_TIERS** (*morTvaIntr*) : TVA intracommerciale **(Peut être écrasé par l'API SIREN)**
+          - **DATE_DES_ACTIV_TIERS** (*techDteDeDesc*) : Date de désactivation du tiers
+          - **DATE_DER_TRT_UNI_LEG_TIERS** (*dateDerTrtUL*) : Date de dernier traitement de l'unité légale **(Peut être écrasé par l'API SIREN)**
+          - **IDT_CHORUS_PRO_TIERS** (*idChorusPro*) : Identifiant CHORUS du tiers (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **CODE_APE_TIERS** (*morCodeApe*) : Code APE (ou NAF) du tiers (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **LIB_CRT_TIERS** (*defDesg*) : Libellé court (ou désignation) du tiers(pour une personne morale ou une personne physique avec SIRET)
+          - **IMMAT_RM** (*immatRM*) : Immatriculation au registre des métiers (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **DTE_CREATION_ASSO** (*dateCreationAsso*) : Date de création de l'association **(Peut être écrasé par l'API SIREN)**
+          - **DTE_PUBLICATION_JOURNAL** (*datePublicationJournal*): Date de publication au journal (pour les associations) **(Peut être écrasé par l'API SIREN)**
+          - **ENSEIGNE** (*enseigne* : Enseigne du tiers) (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Tiers"
+            example:
+              pivotMDMTiers:
+                IDT_UNIQ_TIERS: "620004"
+                TYP_TIERS: M
+                SIRET_TIERS: "32681744200055"
+                SIREN_TIERS: "326817442"
+                CODE_CAT_TIERS: "22"
+                CATEGORIE_JURIDIQUE: "4110"
+                DENOM_USU_TIERS: AGENCE NATIONALE CHEQUES VACANCES
+                SIEGE_TIERS: "1"
+                RSOCL_TIERS: AGENCE NATIONALE CHEQUES VACANCES
+                SIGLE_TIERS: ANCVTEST
+                ACTIF_TIERS: "1"
+                CODE_APE_TIERS: 6619B
+                LIB_CRT_TIERS: AGENCE NATIONALE CHEQUES VACANCES
+        required: true
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              example:
+                codeRetour: "OK"
+          headers: {}
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la modification du tiers avec le status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+          headers: {}
+      deprecated: false
+      security:
+        - basic: []
+
+  /tiers:
+    # Création tiers
+    post:
+      tags:
+        - Tiers
+      summary: Création d'un Tiers
+      description: |
+        Création d'un Tiers
+        ---  
+        ## Informations
+        Le champ SRC_KEY ne peut plus être modifié une fois le tiers créé.
+        
+        Certains champs peuvent être écrasés par l'API SIREN (voir liste ci-dessus). Dans le cas ou le tiers est non diffusible (dans la base INSEE), les informations obligatoires renseignées normalement par l'API SIREN doivent être saisies manuellement. \
+        Dans le cas ou ces informations ne sont pas fournies, une erreur sera renvoyée par l'API du MDM Tiers.
+        
+        Consultez le schéma pour afficher les exemples de valeur pour chaque paramètre.
+      operationId: postTiers
+      parameters: []
+      requestBody:
+        description: |
+          **pivotMDMTiers** :
+          Objet du tiers à créer \
+          *Les champs obligatoires sont marqués d'une étoile (\*)*
+          - **SRC_KEY** (*key.sourceKey*) : Identifiant du tiers dans l'application source
+          - **TYP_TIERS (\*)** (*typeTiers.code*) : Type de tiers (Physique, Morale)
+          - **INFO_CPTL_TIERS** (*infoCptl.code*) : Code informations comptables du tiers
+          - **CIV_TIERS** (*civilite.code*) : Civilité (pour une personne physique)
+          - **NOM_TIERS (\* obligatoire si personne physique)** (*phyNom*) : Nom du Tiers (pour une personne physique)
+          - **PRNM_TIERS (\* obligatoire si personne physique)** (*phyPrnm*) : Prénom du Tiers (pour une personne physique)
+          - **DATE_NAISS_TIERS** (*phyDteDeNais*) : Date de naissance du Tiers (pour une personne physique)
+          - **LIEU_NAISS_TIERS** (*phyLieuDeNais*) : Lieu de naissance du tiers (pour une personne physique)
+          - **NATN_TIERS** (*defNatn.geoCode*) : Lieu de naissance du tiers (pour une personne physique)
+          - **MAT_AGENT_TIERS** (*agentMat*) : Matricule agent (Identifiant provenant du MDM Tiers) du tiers (pour un agent de VNF) **(Peut être écrasé par le MDM RH)**
+          - **SIRET_TIERS** (*siret*) : SIRET du tiers (pour une personne morale ou personne physique avec SIRET)
+          - **SIREN_TIERS** (*siren*) : SIREN du tiers (pour une personne morale ou personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **CODE_CAT_TIERS (\*)** (*categorieTier.code*) : Code catégorie du tiers (correpond à un code stocké dans le référentiel)
+          - **CATEGORIE_JURIDIQUE (\* obligatoire si personne morale)** (*catJuridique.code*) : Catégorie juridique du tiers (correspond à un code stocké dans le référentiel, code INSEE) **(Peut être écrasé par l'API SIREN)**
+          - **DENOM_USU_TIERS (\* obligatoire si personne morale)** (*denomUsuelle*) : Dénomination usuelle du tiers (pour une personne morale ou personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **SIEGE_TIERS** (*etablissementSiege.code*) : Lieu du siege du tiers (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **RCS_TIERS** (*morRcs*) : Numéro du Registre du Commerce des Sociétés (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **RSOCL_TIERS (\* obligatoire si personne morale)** (*morRaisSocl*) : Raison sociale du tiers (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **IMMAT_ETRAN_TIERS** (*immatEtran*) : Immatriculation étrangère du tiers (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **IMMAT_RNA** (*immatRna*) : Immatriculation au Répertoire National des Associations **(Peut être écrasé par l'API SIREN)**
+          - **SIGLE_TIERS** (*sigle*) : Sigle du tiers (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **TVA_INTR_TIERS** (*morTvaIntr*) : TVA intracommerciale **(Peut être écrasé par l'API SIREN)**
+          - **DATE_DES_ACTIV_TIERS** (*techDteDeDesc*) : Date de désactivation du tiers
+          - **DATE_DER_TRT_UNI_LEG_TIERS** (*dateDerTrtUL*) : Date de dernier traitement de l'unité légale **(Peut être écrasé par l'API SIREN)**
+          - **IDT_CHORUS_PRO_TIERS** (*idChorusPro*) : Identifiant CHORUS du tiers (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **CODE_APE_TIERS** (*morCodeApe*) : Code APE (ou NAF) du tiers (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **LIB_CRT_TIERS (\* obligatoire si personne morale)** (*defDesg*) : Libellé court (ou désignation) du tiers(pour une personne morale ou une personne physique avec SIRET)
+          - **IMMAT_RM** (*immatRM*) : Immatriculation au registre des métiers (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **DTE_CREATION_ASSO** (*dateCreationAsso*) : Date de création de l'association **(Peut être écrasé par l'API SIREN)**
+          - **DTE_PUBLICATION_JOURNAL** (*datePublicationJournal*): Date de publication au journal (pour les associations) **(Peut être écrasé par l'API SIREN)**
+          - **ENSEIGNE** (*enseigne* : Enseigne du tiers) (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **ADRTIERSPARENT** :
+            - **SRC_KEY** (*key.sourceKey*) : Identifiant de l'adresse parente dans l'application source
+            - **ADRTIERS**
+              - **SRC_KEY** (*key.sourceKey*) : Identifiant de l'adresse parente dans l'application source
+              - **NUM_ORDRE_ADR_TIERS** (*numOrdre*) : Numéro ordre de l'adresse (mis à jour par SICAVE notamment) source **(Peut être écrasé par SICAVE)**
+              - **TYP_ADR_TIERS (\*)** (*typeAdrs.code*) : Type d'adresse (Facturation, Titulaire, Commande, Réglementaire, etc...)
+              - **NUM_VOIE_ADR_TIER** (*voieNom*) : Numéro de voie de l'adresse
+              - **IND_VOIE_ADR_TIERS** (*voieIndice*) : Indice de voie de l'adresse (BIS, TER)
+              - **TYPE_VOIE_ADR_TIERS** (*voieType.code*) : Type de voie de l'adresse (correspond à un code stocké dans le référentiel)
+              - **NOM_VOIE_ADR_TIERS (* obligatoire si le numéro de voie est communiqué)** (*voieNom*) : Nom de voie de l'adresse
+              - **COMPL_ADR_TIERS** (*voieComplement*) : Complément d'adresse
+              - **LIEUD_ADR_TIERS** (*lieuDit*) : lieu dit d'adresse
+              - **DISTR_SPEC_ADR_TIERS** (*distributionSpec*) : Distribution spéciale de l'adresse
+              - **CP_ADR_TIERS** (*codePost*) : Code postal de l'adresse
+              - **COMN_ADR_TIERS (\*)** (*ville*) : Commune de l'adresse
+              - **NUM_CEDEX_ADR_TIERS** (*cedexNumero*) : Numéro CEDEX de l'adresse
+              - **LIB_CEDEX_ADR_TIERS** (*cedexLibelle*) : Libellé CEDEX de l'adresse
+              - **PAYS_ADR_TIERS** (*pays.geoCode*) : Pays de l'adresse (correspond à un code stocké dans le référentiel)
+              - **EMAIL_PRINCIPALE** (*emailPrincipale*) : Adresse email principale liée à l'adresse
+              - **EMAIL_SECONDAIRE** (*emailSecondaire*) : Adresse email secondaire liée à l'adresse
+              - **TELEPHONE_FIXE** (*telephoneFixe*) : Numéro de téléphone fix lié à l'adresse
+              - **TELEPHONE_PORTABLE** (*telephonePortable*) : Numéro de téléphone portable lié à l'adresse
+              - **FAX** (*fax*) : Numéro de fax lié à l'adresse
+          - **ACTIVITETIERS** :
+            - **SRC_KEY** (*key.sourceKey*) : Identifiant de l'activité dans l'application source
+            - **CODE_ROLE_ACTIV_TIERS (\*)** (*role.code*) : Code du rôle de l'activité (FOU, CLI, correspond à un code stocké dans le référentiel)
+            - **CODE_SEC_ACTIV_TIERS (\*)** (*actv.code*) : Code de l'activité (FINC, DOM, FIN, correspond à un code stocké dans le référentiel)
+            - **IDT_MET_ACTIV_TIERS** (*identifiantMetier*) : Identifiant métier de l'activité (alimenté notamment par SICAVE)
+            - **DATE_ACT_ACTIV_TIERS (\*)** (*dateDebut*) : Date de début de l'activité
+          - **EMAILTIERS** :
+            - **SRC_KEY** (*key.sourceKey*) : Identifiant de l'adresse email dans l'application source
+            - **ADR_MAIL_TIERS (\*)** (*email*) : Adresse email **(doit être unique)**
+            - **IND_PRC** (*indPrc*) : Indique si l'email est principale ou non (il ne peut y avoir qu'une seule adresse email principale)
+          - **TELTIERS** :
+            - **SRC_KEY** (*key.sourceKey*) : Identifiant du téléphone dans l'application source
+            - **TYPE_TEL_TIERS (\*)** (*typeNum.code*) :  Type du téléphone (Fix, portable, correspond à un code stocké dans le référentiel)
+            - **NUM_TEL_TIERS** (*num*) : Numéro de téléphone
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Tiers"
+            example:
+              pivotMDMTiers:
+                SRC_KEY: "KEYGEDO123"
+                TYP_TIERS: M
+                SIRET_TIERS: "32681744200051"
+                SIREN_TIERS: "326817442"
+                CODE_CAT_TIERS: "22"
+                CATEGORIE_JURIDIQUE: "4110"
+                DENOM_USU_TIERS: Test create
+                SIEGE_TIERS: "1"
+                RSOCL_TIERS: AGENCE NATIONALE CHEQUES VACANCES
+                SIGLE_TIERS: ANCVTEST
+                ACTIF_TIERS: "1"
+                CODE_APE_TIERS: 6619B
+                LIB_CRT_TIERS: AGENCE NATIONALE CHEQUES VACANCES
+                ADRTIERSPARENT:
+                  SRC_KEY: "KEYGEDOADRPAR123"
+                  ADRTIERS:
+                    SRC_KEY: "KEYGEDOADR123"
+                    NUMVOIEADRTIERS: "145"
+                    TYPEVOIEADRTIERS: RUE
+                    NOMVOIEADRTIERS: du Breuil
+                    CPADRTIERS: "59000"
+                    COMNADRTIERS: Lille
+                    NUMCEDEXADRTIERS: "54230"
+                TELTIERS:
+                    SRC_KEY: "KEYGEDOTEL123"
+                    TYPE_TEL_TIERS: DOMI
+                    NUM_TEL_TIERS: +33615987485
+                EMAILTIERS:
+                  SRC_KEY: "KEYGEDOEMAIL123"
+                  ADR_MAIL_TIERS: test@VNF.fr
+                ACTIVITETIERS:
+                  SRC_KEY: "KEYGEDOACT123"
+                  CODE_ROLE_ACTIV_TIERS: FOU
+                  CODE_SEC_ACTIV_TIERS: FIN
+                  IDT_MET_ACTIV_TIERS: 0093589
+        required: true
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              example:
+                codeRetour: OK
+                rowIdTierMDM: '1160023'
+                rowIdChildren:
+                  activites:
+                  - SRC_KEY: '1200001170000'
+                    rowIdMDM: '380022'
+                  emails:
+                  - SRC_KEY: '1200001169000'
+                    rowIdMDM: '580008'
+                  adressesParents:
+                  - SRC_KEY: '1200001168000'
+                    rowIdMDM: '1090051'
+                    adresses:
+                    - SRC_KEY: '1200001167000'
+                      rowIdMDM: '1130051'
+          headers: {}
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Champ obligatoire manquant":
+                  description: "Champ olibatoire manquant. A noter que le nom du champ manquant est celui du MDM (voir le schema PivotMDMTiers pour connaitre la correspondance)."
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Champ obligatoire : morRaisSoc"
+                "Activité manquante":
+                  description: "Activité manquante dans la requête"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Il faut au minimum une activite"
+                "Adresse manquante":
+                  description: "Adresse manquante dans la requête"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Il faut au minimum une adresse"
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la création du tiers avec le status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+      deprecated: false
+      security:
+        - basic: []
+        
+  /tiers/recherche:
+    # Recherche tiers
+    post:
+      tags:
+        - Recherche de tiers
+      summary: Recherche de Tiers
+      description: |
+        Recherche de Tiers
+      operationId: rechercheTiers
+      parameters: []
+      requestBody:
+        description: |
+          *Critères de recherche :*
+          - **RECHERCHE** (*recherche*) : Champ de recherche (permet de rechercher sur les champs LIB_CRT_TIERS, SIRET_TIERS, SIREN_TIERS, IDENTIFIANT_METIER en même temps)
+          - **IDT_UNIQ_TIERS (*rowIdObject*) : Identifiant MDM du tiers
+          - **IDTS_UNIQ_TIERS** (*rowIdObject*) : Liste d'identifiants MDM des tiers, permet de rechercher sur plusieurs identifiants différents
+          - **TYP_TIERS** (*typeTiers.code*) : Type de tiers (Physique, Morale)
+          - **INFO_CPTL_TIERS** (*infoCptl.code*) : Code informations comptables du tiers
+          - **CIV_TIERS** (*civilite.code*) : Civilité (pour une personne physique)
+          - **NOM_TIERS** (*phyNom*) : Nom du Tiers (pour une personne physique)
+          - **PRNM_TIERS** (*phyPrnm*) : Prénom du Tiers (pour une personne physique)
+          - **DATE_NAISS_TIERS** (*phyDteDeNais*) : Date de naissance du Tiers (pour une personne physique)
+          - **LIEU_NAISS_TIERS** (*phyLieuDeNais*) : Lieu de naissance du tiers (pour une personne physique)
+          - **NATN_TIERS** (*defNatn.geoCode*) : Lieu de naissance du tiers (pour une personne physique)
+          - **MAT_AGENT_TIERS** (*agentMat*) : Matricule agent (Identifiant provenant du MDM Tiers) du tiers (pour un agent de VNF) **(Peut être écrasé par le MDM RH)**
+          - **SIRET_TIERS** (*siret*) : SIRET du tiers (pour une personne morale ou personne physique avec SIRET)
+          - **SIREN_TIERS** (*siren*) : SIREN du tiers (pour une personne morale ou personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **CODE_CAT_TIERS** (*categorieTier.code*) : Code catégorie du tiers (correpond à un code stocké dans le référentiel)
+          - **CATEGORIE_JURIDIQUE** (*catJuridique.code*) : Catégorie juridique du tiers (correspond à un code stocké dans le référentiel, code INSEE) **(Peut être écrasé par l'API SIREN)**
+          - **DENOM_USU_TIERS** (*denomUsuelle*) : Dénomination usuelle du tiers (pour une personne morale ou personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **SIEGE_TIERS** (*etablissementSiege.code*) : Lieu du siege du tiers (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **RCS_TIERS** (*morRcs*) : Numéro du Registre du Commerce des Sociétés (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **RSOCL_TIERS** (*morRaisSocl*) : Raison sociale du tiers (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **IMMAT_ETRAN_TIERS** (*immatEtran*) : Immatriculation étrangère du tiers (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **IMMAT_RNA** (*immatRna*) : Immatriculation au Répertoire National des Associations **(Peut être écrasé par l'API SIREN)**
+          - **SIGLE_TIERS** (*sigle*) : Sigle du tiers (pour une personne morale ou une personne physique avec **SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **TVA_INTR_TIERS** (*morTvaIntr*) : TVA intracommerciale **(Peut être écrasé par l'API SIREN)**
+          - **DATE_DES_ACTIV_TIERS** (*techDteDeDesc*) : Date de désactivation du tiers
+          - **DATE_DER_TRT_UNI_LEG_TIERS** (*dateDerTrtUL*) : Date de dernier traitement de l'unité légale **(Peut être écrasé par l'API SIREN)**
+          - **IDT_CHORUS_PRO_TIERS** (*idChorusPro*) : Identifiant CHORUS du tiers (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **CODE_APE_TIERS** (*morCodeApe*) : Code APE (ou NAF) du tiers (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **LIB_CRT_TIERS** (*defDesg*) : Libellé court (ou désignation) du tiers(pour une personne morale ou une personne physique avec SIRET)
+          - **IMMAT_RM** (*immatRM*) : Immatriculation au registre des métiers (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+          - **DTE_CREATION_ASSO** (*dateCreationAsso*) : Date de création de l'association **(Peut être écrasé par l'API SIREN)**
+          - **DTE_PUBLICATION_JOURNAL** (*datePublicationJournal*): Date de publication au journal (pour les associations) **(Peut être écrasé par l'API SIREN)**
+          - **ENSEIGNE** (*enseigne* : Enseigne du tiers) (pour une personne morale ou une personne physique avec SIRET) **(Peut être écrasé par l'API SIREN)**
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/rechercheRequest"
+            example:
+              RECHERCHE: "VILOSNES"
+              nbElementsRetournes: 20
+        required: true
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "OK":
+                  description: "OK"
+                  value:
+                    codeRetour: OK
+                    nbResultats: 20
+                    nbTotal: 1
+                    token: SVR1.4HJBI
+                    listTiers:
+                    - IDT_UNIQ_TIERS: '591'
+                      TYP_TIERS: M
+                      CIV_TIERS: "--"
+                      NOM_TIERS: COMMUNE DE VILOSNES-HARAUMONT
+                      NATN_TIERS: '001'
+                      SIRET_TIERS: '21550571000016'
+                      SIREN_TIERS: '215505710'
+                      CODE_CAT_TIERS: '30'
+                      CATEGORIE_JURIDIQUE: '7210'
+                      DENOM_USU_TIERS: COMMUNE DE VILOSNES HARAUMONT
+                      SIEGE_TIERS: '1'
+                      RSOCL_TIERS: COMMUNE DE VILOSNES HARAUMONT
+                      ACTIF_TIERS: '1'
+                      IDT_CHORUS_PRO_TIERS: '21550571000016'
+                      CODE_APE_TIERS: 8411Z
+                      LIB_CRT_TIERS: MAIRIE
+                      DATE_CRE_TIERS: '2020-11-24T17:03:16.670+01:00'
+                      DATE_MOD_TIERS: '2022-11-23T20:03:20+01:00'
+                      CODE_SICAVE_FOU: '0012741'
+                      ENSEIGNE: MAIRIE
+                      RECHERCHE: 'COMMUNE DE VILOSNES HARAUMONT | MAIRIE | 21550571000016 | COMMUNE DE
+                        VILOSNES-HARAUMONT |  | 041V015 | '
+                      ADRTIERSPARENT:
+                      - IDT_ADR_TIERS: '1044280'
+                        ADRTIERS:
+                          IDT_ADR_TIERS: '1084287'
+                          TYP_ADR_TIERS: R
+                          NUM_VOIE_ADR_TIERS: '1'
+                          TYPE_VOIE_ADR_TIERS: PL
+                          NOM_VOIE_ADR_TIERS: DE LA MAIRIE
+                          CP_ADR_TIERS: '55110'
+                          COMN_ADR_TIERS: VILOSNES-HARAUMONT
+                          PAYS_ADR_TIERS: '001'
+                      - IDT_ADR_TIERS: '1044281'
+                        ADRTIERS:
+                          IDT_ADR_TIERS: '1084288'
+                          NUM_ORDRE_ADR_TIERS: '1'
+                          TYPE_VOIE_ADR_TIERS: I
+                          CP_ADR_TIERS: '55110'
+                          COMN_ADR_TIERS: VILOSNES HARAUMONT
+                          PAYS_ADR_TIERS: '001'
+                      - IDT_ADR_TIERS: '1044282'
+                        ADRTIERS:
+                          IDT_ADR_TIERS: '1084289'
+                          NUM_ORDRE_ADR_TIERS: '1'
+                          NUM_VOIE_ADR_TIERS: '1'
+                          TYPE_VOIE_ADR_TIERS: PL
+                          NOM_VOIE_ADR_TIERS: DE LA MAIRIE
+                          CP_ADR_TIERS: '55110'
+                          COMN_ADR_TIERS: VILOSNES HARAUMONT
+                          PAYS_ADR_TIERS: '001'
+                          EMAIL_PRINCIPALE: communevilosnesharaumont@orange.fr
+                          TELEPHONE_FIXE: "+33329858390"
+                      - IDT_ADR_TIERS: '1206'
+                        ADRTIERS:
+                          IDT_ADR_TIERS: '35360'
+                          TYP_ADR_TIERS: R
+                          NUM_VOIE_ADR_TIERS: '1'
+                          TYPE_VOIE_ADR_TIERS: PL
+                          NOM_VOIE_ADR_TIERS: DE LA MAIRIE
+                          CP_ADR_TIERS: '55110'
+                          COMN_ADR_TIERS: VILOSNES-HARAUMONT
+                          PAYS_ADR_TIERS: '001'
+                      - IDT_ADR_TIERS: '21177'
+                        ADRTIERS:
+                          IDT_ADR_TIERS: '472'
+                          TYP_ADR_TIERS: '1'
+                          NUM_VOIE_ADR_TIERS: '1'
+                          TYPE_VOIE_ADR_TIERS: PL
+                          NOM_VOIE_ADR_TIERS: DE LA MAIRIE
+                          CP_ADR_TIERS: '55110'
+                          COMN_ADR_TIERS: VILOSNES HARAUMONT
+                          NUM_CEDEX_ADR_TIERS: '55110'
+                          PAYS_ADR_TIERS: '001'
+                          DATE_INAC_ADR_TIERS: '2020-11-24T21:22:01+01:00'
+                      - IDT_ADR_TIERS: '870232'
+                        ADRTIERS:
+                          IDT_ADR_TIERS: '910232'
+                          TYP_ADR_TIERS: R
+                          NUM_VOIE_ADR_TIERS: '1'
+                          TYPE_VOIE_ADR_TIERS: PL
+                          NOM_VOIE_ADR_TIERS: DE LA MAIRIE
+                          CP_ADR_TIERS: '55110'
+                          COMN_ADR_TIERS: VILOSNES-HARAUMONT
+                          PAYS_ADR_TIERS: '001'
+                      - IDT_ADR_TIERS: '870233'
+                        ADRTIERS:
+                          IDT_ADR_TIERS: '910233'
+                          NUM_ORDRE_ADR_TIERS: '1'
+                          TYP_ADR_TIERS: F
+                          TYPE_VOIE_ADR_TIERS: I
+                          CP_ADR_TIERS: '55110'
+                          COMN_ADR_TIERS: VILOSNES HARAUMONT
+                          PAYS_ADR_TIERS: '001'
+                      - IDT_ADR_TIERS: '947081'
+                        ADRTIERS:
+                          IDT_ADR_TIERS: '987085'
+                          TYP_ADR_TIERS: R
+                          NUM_VOIE_ADR_TIERS: '1'
+                          TYPE_VOIE_ADR_TIERS: PL
+                          NOM_VOIE_ADR_TIERS: DE LA MAIRIE
+                          CP_ADR_TIERS: '55110'
+                          COMN_ADR_TIERS: VILOSNES-HARAUMONT
+                          PAYS_ADR_TIERS: '001'
+                      - IDT_ADR_TIERS: '947082'
+                        ADRTIERS:
+                          IDT_ADR_TIERS: '987086'
+                          NUM_ORDRE_ADR_TIERS: '1'
+                          TYP_ADR_TIERS: F
+                          TYPE_VOIE_ADR_TIERS: I
+                          CP_ADR_TIERS: '55110'
+                          COMN_ADR_TIERS: VILOSNES HARAUMONT
+                          PAYS_ADR_TIERS: '001'
+                      - IDT_ADR_TIERS: '947083'
+                        ADRTIERS:
+                          IDT_ADR_TIERS: '987087'
+                          NUM_ORDRE_ADR_TIERS: '1'
+                          TYP_ADR_TIERS: T
+                          NUM_VOIE_ADR_TIERS: '1'
+                          TYPE_VOIE_ADR_TIERS: PL
+                          NOM_VOIE_ADR_TIERS: DE LA MAIRIE
+                          CP_ADR_TIERS: '55110'
+                          COMN_ADR_TIERS: VILOSNES HARAUMONT
+                          PAYS_ADR_TIERS: '001'
+                          EMAIL_PRINCIPALE: communevilosnesharaumont@orange.fr
+                          TELEPHONE_FIXE: "+33329858390"
+                      ACTIVITETIERS:
+                      - IDT_ACTIV_TIERS: '180039'
+                        CODE_ROLE_ACTIV_TIERS: CLI
+                        CODE_SEC_ACTIV_TIERS: FIN
+                        DATE_ACT_ACTIV_TIERS: '2022-10-04T00:00:00+02:00'
+                        IDT_MET_ACTIV_TIERS: 041V015
+                      - IDT_ACTIV_TIERS: '180040'
+                        CODE_ROLE_ACTIV_TIERS: CLI
+                        CODE_SEC_ACTIV_TIERS: DOM
+                        DATE_ACT_ACTIV_TIERS: '2022-10-04T00:00:00+02:00'
+                    
+                "Aucun résultat":
+                  description: "Aucun résultat"
+                  value:
+                    codeRetour: "OK"
+                    libErreur: "Aucun Tiers correspondant a la recherche"
+          headers: {}
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Pas d'argument de recherche renseigné":
+                  description: "Pas d'argument de recherche renseigné"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur du serviceMDMTiers : Recherche non renseignée "
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la récupération du tiers avec le status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+      deprecated: false
+      security:
+        - basic: []
+
+  # --------------------------------------------------------------
+  # Gestion des activités
+  # --------------------------------------------------------------
+  /tiers/{rowIDTiers}/activite:
+    parameters:
+      - name: rowIDTiers
+        in: path
+        description: Identifiant MDM du Tiers
+        required: true
+        schema:
+          type: string
+
+    # Création activité
+    post:
+      tags:
+        - Delta Activite
+      summary: Ajout d'une activite en mode Delta
+      operationId: addactiviteDelta
+      parameters: []
+      requestBody:
+        description: |
+          **ACTIVITETIERS** :
+          Objet de l'activité à créer \
+          *Les champs obligatoires sont marqués d'une étoile (\*)*
+          - **SRC_KEY** (*key.sourceKey*) : Identifiant de l'activité dans l'application source
+          - **CODE_ROLE_ACTIV_TIERS (\*)** (*role.code*) : Code du rôle de l'activité (FOU, CLI, correspond à un code stocké dans le référentiel)
+          - **CODE_SEC_ACTIV_TIERS (\*)** (*actv.code*) : Code de l'activité (FINC, DOM, FIN, correspond à un code stocké dans le référentiel)
+          - **IDT_MET_ACTIV_TIERS** (*identifiantMetier*) : Identifiant métier de l'activité (alimenté notamment par SICAVE)
+          - **DATE_ACT_ACTIV_TIERS (\*)** (*dateDebut*) : Date de début de l'activité
+        content:
+          application/json:
+            schema:
+              required:
+                - ACTIVITETIERS
+              type: object
+              properties:
+                ACTIVITETIERS:
+                  $ref: "#/components/schemas/ACTIVITETIERS"
+              example:
+                ACTIVITETIERS:
+                  CODE_ROLE_ACTIV_TIERS: CLI
+                  CODE_SEC_ACTIV_TIERS: DOM
+                  DATE_ACT_ACTIV_TIERS: 2022-05-02T00:00:00+02:00
+        required: true
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              example:
+                codeRetour: "OK"
+          headers: {}
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la création du tiers avec le status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+      deprecated: false
+      security:
+        - basic: []
+
+  /tiers/{rowIDTiers}/activite/{rowIDActivite}:
+    parameters:
+      - name: rowIDTiers
+        in: path
+        description: Identifiant MDM du Tiers
+        required: true
+        schema:
+          type: string
+      - name: rowIDActivite
+        in: path
+        description: Identifiant MDM de l'activité
+        required: true
+        schema:
+          type: string
+
+    # Modification activité
+    put:
+      tags:
+        - Delta Activite
+      summary: Modification d'une activite en mode Delta
+      operationId: UpdaactiviteDelta
+      parameters: []
+      requestBody:
+        description: |
+          **ACTIVITETIERS** :
+          Objet de l'activité à modifier \
+          *Les champs obligatoires sont marqués d'une étoile (\*)*
+          - **CODE_ROLE_ACTIV_TIERS** (*role.code*) : Code du rôle de l'activité (FOU, CLI, correspond à un code stocké dans le référentiel)
+          - **CODE_SEC_ACTIV_TIERS** (*actv.code*) : Code de l'activité (FINC, DOM, FIN, correspond à un code stocké dans le référentiel)
+          - **IDT_MET_ACTIV_TIERS** (*identifiantMetier*) : Identifiant métier de l'activité (alimenté notamment par SICAVE)
+          - **DATE_ACT_ACTIV_TIERS** (*dateDebut*) : Date de début de l'activité
+        content:
+          application/json:
+            schema:
+              required:
+                - ACTIVITETIERS
+              type: object
+              properties:
+                ACTIVITETIERS:
+                  $ref: "#/components/schemas/ACTIVITETIERS"
+              example:
+                ACTIVITETIERS:
+                  CODE_ROLE_ACTIV_TIERS: "FOU"
+                  CODE_SEC_ACTIV_TIERS: "DOM"
+                  DATE_ACT_ACTIV_TIERS: "2022-05-02T00:00:00+02:00"
+        required: true
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              example:
+                codeRetour: "OK"
+          headers: {}
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la modification de l'activité avec le status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+      deprecated: false
+      security:
+        - basic: []
+
+    # Récupération activité
+    get:
+      tags:
+        - Delta Activite
+      summary: Récupération d'une activite par son identifiant MDM
+      operationId: GetActiviteDelta
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              example:
+                codeRetour: OK
+                ACTIVITETIERS:
+                  IDT_ACTIV_TIERS: '380004'
+                  CODE_ROLE_ACTIV_TIERS: FOU
+                  CODE_SEC_ACTIV_TIERS: FIN
+                  DATE_ACT_ACTIV_TIERS: '2022-10-20T00:00:00+02:00'
+          headers: {}
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Activité inactive":
+                  description: "Activité inactive"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Activité inactive"
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la récupération d'une activite avec le status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+      deprecated: false
+      security:
+        - basic: []
+
+    # Suppression activité
+    delete:
+      tags:
+        - Delta Activite
+      summary: Suppression d'une activité
+      operationId: DeleteActiviteDelta
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              example:
+                codeRetour: OK
+          headers: {}
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la suppression d'une activité avec le status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+      deprecated: false
+      security:
+        - basic: []
+        
+  # --------------------------------------------------------------
+  # Gestion des adresses
+  # --------------------------------------------------------------
+  /tiers/{rowIDTiers}/adresse:
+    parameters:
+      - name: rowIDTiers
+        in: path
+        description: Identifiant MDM du Tiers
+        required: true
+        schema:
+          type: string
+
+    # Création adresse
+    post:
+      tags:
+        - Delta Adresse
+      summary: Ajout d'une adresse en mode Delta
+      operationId: addadresseDelta
+      parameters: []
+      requestBody:
+        description: |
+          **ADRTIERS** : Objet de l'adresse à créer
+          *Les champs obligatoires sont marqués d'une étoile (\*)*
+          - **SRC_KEY** (*key.sourceKey*) : Identifiant de l'adresse dans l'application source
+          - **NUM_ORDRE_ADR_TIERS** (*numOrdre*) : Numéro ordre de l'adresse (mis à jour par SICAVE notamment) source **(Peut être écrasé par SICAVE)**
+          - **TYP_ADR_TIERS (\*)** (*typeAdrs.code*) : Type d'adresse (Facturation, Titulaire, Commande, Réglementaire, etc...)
+          - **NUM_VOIE_ADR_TIER** (*voieNom*) : Numéro de voie de l'adresse
+          - **IND_VOIE_ADR_TIERS** (*voieIndice*) : Indice de voie de l'adresse (BIS, TER)
+          - **TYPE_VOIE_ADR_TIERS** (*voieType.code*) : Type de voie de l'adresse (correspond à un code stocké dans le référentiel)
+          - **NOM_VOIE_ADR_TIERS (* obligatoire si le numéro de voie est communiqué)** (*voieNom*) : Nom de voie de l'adresse
+          - **COMPL_ADR_TIERS** (*voieComplement*) : Complément d'adresse
+          - **LIEUD_ADR_TIERS** (*lieuDit*) : lieu dit d'adresse
+          - **DISTR_SPEC_ADR_TIERS** (*distributionSpec*) : Distribution spéciale de l'adresse
+          - **CP_ADR_TIERS** (*codePost*) : Code postal de l'adresse
+          - **COMN_ADR_TIERS (\*)** (*ville*) : Commune de l'adresse
+          - **NUM_CEDEX_ADR_TIERS** (*cedexNumero*) : Numéro CEDEX de l'adresse
+          - **LIB_CEDEX_ADR_TIERS** (*cedexLibelle*) : Libellé CEDEX de l'adresse
+          - **PAYS_ADR_TIERS** (*pays.geoCode*) : Pays de l'adresse (correspond à un code stocké dans le référentiel)
+          - **EMAIL_PRINCIPALE** (*emailPrincipale*) : Adresse email principale liée à l'adresse
+          - **EMAIL_SECONDAIRE** (*emailSecondaire*) : Adresse email secondaire liée à l'adresse
+          - **TELEPHONE_FIXE** (*telephoneFixe*) : Numéro de téléphone fix lié à l'adresse
+          - **TELEPHONE_PORTABLE** (*telephonePortable*) : Numéro de téléphone portable lié à l'adresse
+          - **FAX** (*fax*) : Numéro de fax lié à l'adresse
+        content:
+          application/json:
+            schema:
+              required:
+                - ADRTIERS
+              type: object
+              properties:
+                ADRTIERS:
+                  $ref: "#/components/schemas/ADRTIERS"
+              example:
+                ADRTIERS:
+                  NUM_VOIE_ADR_TIERS: "15"
+                  TYPE_VOIE_ADR_TIERS: I
+                  NOM_VOIE_ADR_TIERS: ROUTE DE FRENCQ GUIGUI
+                  COMN_ADR_TIERS: LILLE AUTRE
+        required: true
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              example:
+                codeRetour: OK
+          headers: {}
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la création d'une aadresse avec le status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+      deprecated: false
+      security:
+        - basic: []
+
+  /tiers/{rowIDTiers}/adresse/{rowIDAdresseParente}:
+    parameters:
+      - name: rowIDTiers
+        in: path
+        description: Identifiant MDM du Tiers
+        required: true
+        schema:
+          type: string
+      - name: rowIDAdresseParente
+        in: path
+        description: Identifiant MDM de l'adresse parente
+        required: true
+        schema:
+          type: string
+
+    # Modification adresse
+    put:
+      tags:
+        - Delta Adresse
+      summary: Modification d'une adresse en mode Delta
+      operationId: UpdateadresseDelta
+      parameters: []
+      requestBody:
+        description: |
+          **ADRTIERS** : Objet de l'adresse à créer
+          *Les champs obligatoires sont marqués d'une étoile (\*)*
+          - **IDT_ADR_TIERS** (*rowIdObject*) : Identifiant MDM de l'adresse
+          - **SRC_KEY** (*key.sourceKey*) : Identifiant de l'adresse dans l'application source
+          - **NUM_ORDRE_ADR_TIERS** (*numOrdre*) : Numéro ordre de l'adresse (mis à jour par SICAVE notamment) source **(Peut être écrasé par SICAVE)**
+          - **TYP_ADR_TIERS** (*typeAdrs.code*) : Type d'adresse (Facturation, Titulaire, Commande, Réglementaire, etc...)
+          - **NUM_VOIE_ADR_TIER** (*voieNom*) : Numéro de voie de l'adresse
+          - **IND_VOIE_ADR_TIERS** (*voieIndice*) : Indice de voie de l'adresse (BIS, TER)
+          - **TYPE_VOIE_ADR_TIERS** (*voieType.code*) : Type de voie de l'adresse (correspond à un code stocké dans le référentiel)
+          - **NOM_VOIE_ADR_TIERS** (*voieNom*) : Nom de voie de l'adresse
+          - **COMPL_ADR_TIERS** (*voieComplement*) : Complément d'adresse
+          - **LIEUD_ADR_TIERS** (*lieuDit*) : lieu dit d'adresse
+          - **DISTR_SPEC_ADR_TIERS** (*distributionSpec*) : Distribution spéciale de l'adresse
+          - **CP_ADR_TIERS** (*codePost*) : Code postal de l'adresse
+          - **COMN_ADR_TIERS** (*ville*) : Commune de l'adresse
+          - **NUM_CEDEX_ADR_TIERS** (*cedexNumero*) : Numéro CEDEX de l'adresse
+          - **LIB_CEDEX_ADR_TIERS** (*cedexLibelle*) : Libellé CEDEX de l'adresse
+          - **PAYS_ADR_TIERS** (*pays.geoCode*) : Pays de l'adresse (correspond à un code stocké dans le référentiel)
+          - **EMAIL_PRINCIPALE** (*emailPrincipale*) : Adresse email principale liée à l'adresse
+          - **EMAIL_SECONDAIRE** (*emailSecondaire*) : Adresse email secondaire liée à l'adresse
+          - **TELEPHONE_FIXE** (*telephoneFixe*) : Numéro de téléphone fix lié à l'adresse
+          - **TELEPHONE_PORTABLE** (*telephonePortable*) : Numéro de téléphone portable lié à l'adresse
+          - **FAX** (*fax*) : Numéro de fax lié à l'adresse
+        content:
+          application/json:
+            schema:
+              required:
+                - ADRTIERS
+              type: object
+              properties:
+                ADRTIERS:
+                  $ref: "#/components/schemas/ADRTIERS"
+              example:
+                ADRTIERS:
+                  TYP_ADR_TIERS: R
+        required: true
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              example:
+                codeRetour: OK
+          headers: {}
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la modification d'une adresse avec le status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+      deprecated: false
+      security:
+        - basic: []
+    
+    # Récupération adresse
+    get:
+      tags:
+        - Delta Adresse
+      summary: Récupération d'une adresse par son identifiant MDM
+      operationId: GetAdresseDelta
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              example:
+                codeRetour: OK
+                IDT_ADR_TIERS: '1090018'
+                ADRTIERS:
+                  IDT_ADR_TIERS: '1130018'
+                  TYP_ADR_TIERS: T
+                  TYPE_VOIE_ADR_TIERS: I
+                  LIEUD_ADR_TIERS: LA BOIRE D'ANJOU
+                  COMN_ADR_TIERS: LA CHAPELLE BASSE MER
+                  PAYS_ADR_TIERS: '001'
+                  TELEPHONE_FIXE: "+33675531101"
+                  LATITUDE: '5.789647'
+                  LONGITUDE: '53.174536'
+          headers: {}
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la récupération d'une adresse avec le status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+      deprecated: false
+      security:
+        - basic: []
+        
+    # Suppression adresse
+    delete:
+      tags:
+        - Delta Adresse
+      summary: Suppression d'une adresse
+      operationId: DeleteAdresseDelta
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              example:
+                codeRetour: OK
+          headers: {}
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la suppression d'une adresse avec le status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+      deprecated: false
+      security:
+        - basic: []
+        
+  # --------------------------------------------------------------
+  # Gestion des adresses email
+  # --------------------------------------------------------------
+  /tiers/{rowIDTiers}/email:
+    parameters:
+      - name: rowIDTiers
+        in: path
+        description: Identifiant MDM du Tiers
+        required: true
+        schema:
+          type: string
+          
+    # Création email
+    post:
+      tags:
+        - Delta Email
+      summary: Ajout d'une email en mode Delta
+      operationId: addemailDelta
+      parameters: []
+      requestBody:
+        description: |
+          **EMAILTIERS** :
+          Objet de l'adresse email à créer
+            - **SRC_KEY** (*key.sourceKey*) : Identifiant de l'adresse email dans l'application source
+            - **ADR_MAIL_TIERS (\*)** (*email*) : Adresse email **(doit être unique)**
+            - **IND_PRC** (*indPrc*) : Indique si l'email est principale ou non (il ne peut y avoir qu'une seule adresse email principale)
+        content:
+          application/json:
+            schema:
+              required:
+                - EMAILTIERS
+              type: object
+              properties:
+                EMAILTIERS:
+                  $ref: "#/components/schemas/EMAILTIERS"
+              example:
+                EMAILTIERS:
+                  ADR_MAIL_TIERS: tes123@test.com
+        required: true
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              example:
+                codeRetour: OK
+          headers: {}
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la création d'une adresse email status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+      deprecated: false
+      security:
+        - basic: []
+        
+  /tiers/{rowIDTiers}/email/{rowIDEmail}:
+    parameters:
+      - name: rowIDTiers
+        in: path
+        description: Identifiant MDM du Tiers
+        required: true
+        schema:
+          type: string
+      - name: rowIDEmail
+        in: path
+        description: Identifiant MDM de l'adresse email
+        required: true
+        schema:
+          type: string
+          
+    # Modification email
+    put:
+      tags:
+        - Delta Email
+      summary: Modification d'une email en mode Delta
+      operationId: UpdateemailDelta
+      parameters: []
+      requestBody:
+        description: |
+          **EMAILTIERS** :
+          Objet de l'adresse email à modifier
+          - **SRC_KEY** (*key.sourceKey*) : Identifiant de l'adresse email dans l'application source
+          - **ADR_MAIL_TIERS** (*email*) : Adresse email **(doit être unique)**
+          - **IND_PRC** (*indPrc*) : Indique si l'email est principale ou non (il ne peut y avoir qu'une seule adresse email principale)
+        content:
+          application/json:
+            schema:
+              required:
+                - EMAILTIERS
+              type: object
+              properties:
+                EMAILTIERS:
+                  $ref: "#/components/schemas/EMAILTIERS"
+              example:
+                EMAILTIERS:
+                  ADR_MAIL_TIERS: tes1234@test.com
+        required: true
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              example:
+                codeRetour: OK
+          headers: {}
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la modification d'une adresse email avec le status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+      deprecated: false
+      security:
+        - basic: []
+    
+    # Récupération email
+    get:
+      tags:
+        - Delta Email
+      summary: Récupération d'une email par son identifiant MDM
+      operationId: GetEmailDelta
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              example:
+                codeRetour: OK
+                EMAILTIERS:
+                  IDT_MAILTIERS: '580007'
+                  ADR_MAIL_TIERS: lucas.macori.test1@cgi.com
+                  IND_PRC: '1'
+          headers: {}
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la récupération d'une adresse email avec le status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+      deprecated: false
+      security:
+        - basic: []
+        
+    # Suppression email
+    delete:
+      tags:
+        - Delta Email
+      summary: Suppression d'une email
+      operationId: DeleteEmailDelta
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              example:
+                codeRetour: OK
+          headers: {}
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la suppression d'une adresse email avec le status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+      deprecated: false
+      security:
+        - basic: []
+        
+  # --------------------------------------------------------------
+  # Gestion des téléphones
+  # --------------------------------------------------------------
+  /tiers/{rowIDTiers}/telephone:
+    parameters:
+      - name: rowIDTiers
+        in: path
+        description: Identifiant MDM du Tiers
+        required: true
+        schema:
+          type: string
+
+    # Ajout téléphone
+    post:
+      tags:
+        - Delta Telephone
+      summary: Ajout d'un telephone en mode Delta
+      operationId: addtelephoneDelta
+      parameters: []
+      requestBody:
+        description: |
+          **TELTIERS** :
+          Objet du numéro de téléphone à modifier
+          - **SRC_KEY** (*key.sourceKey*) : Identifiant du téléphone dans l'application source
+          - **TYPE_TEL_TIERS (\*)** (*typeNum.code*) :  Type du téléphone (Fix, portable, correspond à un code stocké dans le référentiel)
+          - **NUM_TEL_TIERS** (*num*) : Numéro de téléphone
+        content:
+          application/json:
+            schema:
+              required:
+                - TELTIERS
+              type: object
+              properties:
+                TELTIERS:
+                  $ref: "#/components/schemas/TELTIERS"
+              example:
+                TELTIERS:
+                  TYPE_TEL_TIERS: PORT
+                  NUM_TEL_TIERS: "+33615977569"
+        required: true
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              example:
+                codeRetour: OK
+          headers: {}
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la création d'un téléphone avec le status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+      deprecated: false
+      security:
+        - basic: []
+
+  /tiers/{rowIDTiers}/telephone/{rowIDTelephone}:
+    parameters:
+      - name: rowIDTiers
+        in: path
+        description: Identifiant MDM du Tiers
+        required: true
+        schema:
+          type: string
+      - name: rowIDTelephone
+        in: path
+        description: Identifiant MDM du Téléphone
+        required: true
+        schema:
+          type: string
+
+    # Modification téléphone
+    put:
+      tags:
+        - Delta Telephone
+      summary: Modification d'un telephone en mode Delta
+      operationId: UpdatetelephoneDelta
+      parameters: []
+      requestBody:
+        description: |
+          **TELTIERS** :
+          Objet du numéro de téléphone à modifier
+          - **SRC_KEY** (*key.sourceKey*) : Identifiant du téléphone dans l'application source
+          - **TYPE_TEL_TIERS** (*typeNum.code*) : Type du téléphone (Fix, portable, correspond à un code stocké dans le référentiel)
+          - **NUM_TEL_TIERS** (*num*) : Numéro de téléphone
+        content:
+          application/json:
+            schema:
+              required:
+                - TELTIERS
+              type: object
+              properties:
+                TELTIERS:
+                  $ref: "#/components/schemas/TELTIERS"
+              example:
+                TELTIERS:
+                  TYPE_TEL_TIERS: PORT
+                  NUM_TEL_TIERS: "+33615977569"
+        required: true
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              example:
+                codeRetour: OK
+          headers: {}
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la modification d'un téléphone avec le status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+      deprecated: false
+      security:
+        - basic: []
+
+    # Récupération téléphone
+    get:
+      tags:
+        - Delta Telephone
+      summary: Récupération d'un telephone par son identifiant MDM
+      operationId: GetTelephoneDelta
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              example:
+                codeRetour: OK
+                TELTIERS:
+                  IDT_TEL_TIERS: '249'
+                  TYPE_TEL_TIERS: INDE
+                  NUM_TEL_TIERS: '08 20 01 20 20'
+          headers: {}
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la récupération d'un téléphone avec le status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+      deprecated: false
+      security:
+        - basic: []
+
+    # Suppression téléphone
+    delete:
+      tags:
+        - Delta Telephone
+      summary: Suppression d'un telephone
+      operationId: DeleteteleDelta
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              example:
+                codeRetour: OK
+          headers: {}
+        "500":
+          description: "Erreur"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/retourBasique"
+              examples:
+                "Erreur provenant du MDM":
+                  description: "Erreur provenant du MDM"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Erreur lors de la suppression d'un téléphone avec le status HTTP : 500"
+                "Erreur inconnue":
+                  description: "Erreur inconnue"
+                  value:
+                    codeRetour: "KO"
+                    libErreur: "Une erreur inconnue est survenue lors du contact du MDM"
+      deprecated: false
+      security:
+        - basic: []
+
+# ==============================================================
+# Composants
+# ==============================================================
+components:
+
+  # --------------------------------------------------------------
+  # Schemas
+  # --------------------------------------------------------------
+  schemas:
+    # Objet Tiers
+    Tiers:
+      title: Tiers
+      description: Objet pivot utilisé pour les échanges via API
+      required:
+        - pivotMDMTiers
+      type: object
+      properties:
+        pivotMDMTiers:
+          $ref: "#/components/schemas/PivotMDMTiers"
+      example:
+        pivotMDMTiers:
+          IDT_UNIQ_TIERS: "620004"
+          TYP_TIERS: M
+          SIRET_TIERS: "32681744200055"
+          SIREN_TIERS: "326817442"
+          CODE_CAT_TIERS: "22"
+          CATEGORIE_JURIDIQUE: "4110"
+          DENOM_USU_TIERS: AGENCE NATIONALE CHEQUES VACANCES
+          SIEGE_TIERS: "1"
+          RSOCL_TIERS: AGENCE NATIONALE CHEQUES VACANCES
+          SIGLE_TIERS: ANCVTEST
+          ACTIF_TIERS: "1"
+          CODE_APE_TIERS: 6619B
+          LIB_CRT_TIERS: AGENCE NATIONALE CHEQUES VACANCES
+          ADRTIERSPARENT:
+            - IDT_ADR_TIERS: "630004"
+              ADRTIERS:
+                IDT_ADR_TIERS: "650034"
+                NUM_VOIE_ADR_TIERS: "145"
+                TYPE_VOIE_ADR_TIERS: RUE
+                NOM_VOIE_ADR_TIERS: du Breuil
+                CP_ADR_TIERS: "59000"
+                COMN_ADR_TIERS: Lille
+                NUM_CEDEX_ADR_TIERS: "54230"
+          TELTIERS:
+            - IDT_TEL_TIERS: "220002"
+              TYPE_TEL_TIERS: DOMI
+              NUM_TEL_TIERS: +33615987485
+          EMAILTIERS:
+            - IDT_MAILTIERS: "200002"
+              ADR_MAIL_TIERS: test222222@ancv.fr
+          ACTIVITETIERS:
+            - IDT_ACTIV_TIERS: "150004"
+              CODE_ROLE_ACTIV_TIERS: FOU
+              CODE_SEC_ACTIV_TIERS: FIN
+              IDT_MET_ACTIV_TIERS: 0093589
+    PivotMDMTiers:
+      title: PivotMDMTiers
+      required:
+        - IDT_UNIQ_TIERS
+        - TYP_TIERS
+        - SIRET_TIERS
+        - SIREN_TIERS
+        - CODE_CAT_TIERS
+        - CATEGORIE_JURIDIQUE
+        - DENOM_USU_TIERS
+        - SIEGE_TIERS
+        - RSOCL_TIERS
+        - SIGLE_TIERS
+        - ACTIF_TIERS
+        - CODE_APE_TIERS
+        - LIB_CRT_TIERS
+        - ADRTIERSPARENT
+        - TELTIERS
+        - EMAILTIERS
+        - ACTIVITETIERS
+      type: object
+      properties:
+        IDT_UNIQ_TIERS:
+          type: string
+          description: |
+            *rowIdObject* : Identifiant MDM du tiers"
+        SRC_KEY:
+          type: string
+          description: |
+            *key.sourceKey* : Identifiant du tiers dans l'application source
+        TYP_TIERS:
+          type: string
+          description: |
+            *typeTiers.code* : Type de tiers (Physique, Morale)
+          example: P, M
+        INFO_CPTL_TIERS:
+          type: string
+          description: |
+            *infoCptl.code* : Code informations comptables du tiers
+        CIV_TIERS:
+          type: string
+          description: |
+            *civilite.code* : Civilité
+          example: H, F
+        NOM_TIERS:
+          type: string
+          description: |
+            *phyNom* : Nom du tiers (pour une personne physique)
+        PRNM_TIERS:
+          type: string
+          description: |
+            *phyPrnm* : Prénom du tiers (pour une personne physique)
+        DATE_NAISS_TIERS:
+          type: string
+          description: |
+            *phyDteDeNais* : Date de naissance (pour une personne physique)
+          format: 'YYYY-MM-DDTHH24:MM:SS'
+          example: '1985-12-27T14:38:42'
+        LIEU_NAISS_TIERS:
+          type: string
+          description: |
+            *phyLieuDeNais* : Lieu de naissance du tiers (pour une personne physique)
+          example: 'Nancy'
+        NATN_TIERS:
+          type: string
+          description: |
+            *defNatn.geoCode* : Nationalité du tiers (pour une personne physique, correpond à un pays stocké dans le référentiel)
+          example: '001'
+        MAT_AGENT_TIERS:
+          type: string
+          description: |
+            *agentMat* : Matricule agent (Identifiant provenant du MDM Tiers) du tiers (pour un agent de VNF)
+          example: '01574582'
+        SIRET_TIERS:
+          type: string
+          description: |
+            *siret* : SIRET du tiers (pour une personne morale ou personne physique avec SIRET)
+          example: '70204275500554'
+        SIREN_TIERS:
+          type: string
+          description: |
+            *siren* : SIREN du tiers (pour une personne morale ou personne physique avec SIRET)
+          example: '702042755'
+        CODE_CAT_TIERS:
+          type: string
+          description: |
+            *categorieTier.code* : Code catégorie du tiers (correpond à un code stocké dans le référentiel)
+          example: '22'
+        CATEGORIE_JURIDIQUE:
+          type: string
+          description: |
+            *catJuridique.code* : Catégorie juridique du tiers (correspond à un code stocké dans le référentiel, code INSEE)
+          example: '1100'
+        DENOM_USU_TIERS:
+          type: string
+          description: |
+            *denomUsuelle* : Dénomination usuelle du tiers (pour une personne morale ou personne physique avec SIRET)
+          example: 'CGI France'
+        SIEGE_TIERS:
+          type: string
+          description: |
+            *etablissementSiege.code* : Lieu du siege du tiers (pour une personne morale ou une personne physique avec SIRET)
+        RCS_TIERS:
+          type: string
+          description: |
+            *morRcs* : Numéro du Registre du Commerce des Sociétés (pour une personne morale ou une personne physique avec SIRET)
+          example: '702042755'
+        RSOCL_TIERS:
+          type: string
+          description: |
+            *morRaisSocl* : Raison sociale du tiers (pour une personne morale ou une personne physique avec SIRET)
+          example: 'CGI'
+        IMMAT_ETRAN_TIERS:
+          type: string
+          description: |
+            *immatEtran* : Immatriculation étrangère du tiers (pour une personne morale ou une personne physique avec SIRET)
+        IMMAT_RNA:
+          type: string
+          description: |
+            *immatRna* : Immatriculation au Répertoire National des Associations
+          example: 'RCS PARIS B 517 403 572'
+        SIGLE_TIERS:
+          type: string
+          description: |
+            *sigle* : Sigle du tiers (pour une personne morale ou une personne physique avec SIRET)
+        TVA_INTR_TIERS:
+          type: string
+          description: |
+            *morTvaIntr* : TVA intracommerciale
+          example: FR63702042755
+        DATE_DES_ACTIV_TIERS:
+          type: string
+          description: |
+            *techDteDeDesc* : Date de désactivation du tiers
+          format: 'YYYY-MM-DDTHH24:MM:SS'
+          example: '2022-12-27T14:38:42'
+        DATE_DER_TRT_UNI_LEG_TIERS:
+          type: string
+          description: |
+            *dateDerTrtUL* : Date de dernier traitement de l'unité légale
+          format: 'YYYY-MM-DDTHH24:MM:SS'
+          example: '2022-12-27T14:38:42'
+        IDT_CHORUS_PRO_TIERS:
+          type: string
+          description: |
+            *idChorusPro* : Identifiant CHORUS du tiers (pour une personne morale ou une personne physique avec SIRET)
+        CODE_APE_TIERS:
+          type: string
+          description: |
+            *morCodeApe* : Code APE (ou NAF) du tiers (pour une personne morale ou une personne physique avec SIRET)
+          example: '62.02A'
+        LIB_CRT_TIERS:
+          type: string
+          description: |
+            *defDesg* : Libellé court (ou désignation) du tiers(pour une personne morale ou une personne physique avec SIRET)
+          example: 'CGI France'
+        STATUT_TIERS:
+          type: string
+        UTLS_CRE_TIERS:
+          type: string
+          description: Utilisateur de création du tiers (champ non modifiable)
+        DATE_CRE_TIERS:
+          type: string
+          description: Date de création du tiers (champ non modifiable)
+        UTLS_MOD_TIERS:
+          type: string
+          description: Utilisateur de création du tiers (champ non modifiable)
+        DATE_MOD_TIERS:
+          type: string
+          description: Date de modifiable du tiers (champ non modifiable)
+        IMMAT_RM:
+          type: string
+          description: |
+            *immatRM* : Immatriculation au registre des métiers (pour une personne morale ou une personne physique avec SIRET)
+        DTE_CREATION_ASSO:
+          type: string
+          description: |
+            *dateCreationAsso* : Date de création de l'association
+        DTE_PUBLICATION_JOURNAL:
+          type: string
+          description: |
+            *datePublicationJournal* : Date de publication au journal (pour les associations)
+        Enseigne:
+          type: string
+          description: |
+            *enseigne* : Enseigne du tiers (pour une personne morale ou une personne physique avec SIRET)
+        ACTIF_TIERS:
+          type: string
+        ADRTIERSPARENT:
+          title: ADRTIERSPARENT
+          description: Adresse parente du tiers (englobe l'adresse)
+          required:
+            - ADRTIERS
+          type: object
+          properties:
+            IDTADRTIERS:
+              type: string
+              description: |
+                *rowIdObject* : Identifiant MDM de l'adresse parente du tiers
+            SRC_KEY:
+              type: string
+              description: |
+                *key.sourceKey* : Identifiant de l'adresse parente du tiers dans l'application source
+            ADRTIERS:
+              $ref: "#/components/schemas/ADRTIERS"
+        TELTIERS:
+          type: array
+          items:
+            $ref: "#/components/schemas/TELTIER"
+        EMAILTIERS:
+          type: array
+          items:
+            $ref: "#/components/schemas/EMAILTIER"
+        ACTIVITETIERS:
+          type: array
+          items:
+            $ref: "#/components/schemas/ACTIVITETIER"
+    ADRTIERS:
+      title: ADRTIERS
+      description: Adresse du tiers
+      type: object
+      properties:
+        IDT_ADR_TIERS:
+          type: string
+          description: |
+            *rowIdObject* : Identifiant MDM de l'adresse
+        SRC_KEY:
+          type: string
+          description: |
+            *key.sourceKey* : Identifiant de l'adresse dans l'application source
+        NUM_ORDRE_ADR_TIERS:
+          type: string
+          description: |
+            *numOrdre* : Numéro ordre de l'adresse (mis à jour par SICAVE notamment)
+          example: '01'
+        TYP_ADR_TIERS:
+          type: string
+          description: |
+            *typeAdrs.code* : Type d'adresse (Facturation, Titulaire, Commande, Réglementaire, etc...)
+          example: 'F'
+        NUM_VOIE_ADR_TIERS:
+          type: string
+          description: |
+            *voieNom* : Numéro de voie de l'adresse
+          example: 8
+        IND_VOIE_ADR_TIERS:
+          type: string
+          description: |
+            *voieIndice* : Indice de voie de l'adresse (BIS, TER)
+          example: 'B'
+        TYPE_VOIE_ADR_TIERS:
+          type: string
+          description: |
+            *voieType.code* : Type de voie de l'adresse (correspond à un code stocké dans le référentiel)
+          example: 'RUE'
+        NOM_VOIE_ADR_TIERS:
+          type: string
+          description: |
+            *voieNom* : Nom de voie de l'adresse
+          example: 'ANATOLE FRANCE'
+        COMPL_ADR_TIERS:
+          type: string
+          description: |
+            *voieComplement* : Complément d'adresse
+          example: 'Batiment A, Entrée D'
+        LIEUD_ADR_TIERS:
+          type: string
+          description: |
+            *lieuDit* : Lieu dit d'adresse
+          example: 'LE BOURDET'
+        DISTR_SPEC_ADR_TIERS:
+          type: string
+          description: |
+            *distributionSpec* : Distribution spéciale de l'adresse
+        CP_ADR_TIERS:
+          type: string
+          description: |
+            *codePost* : Code postal de l'adresse
+          example: '59000'
+        COMN_ADR_TIERS:
+          type: string
+          description: |
+            *ville* : Commune de l'adresse
+          example: 'LILLE'
+        NUM_CEDEX_ADR_TIERS:
+          type: string
+          description: |
+            *cedexNumero* : Numéro CEDEX de l'adresse
+          example: 7
+        LIB_CEDEX_ADR_TIERS:
+          type: string
+          description: |
+            *cedexLibelle* : Libellé CEDEX de l'adresse
+        PAYS_ADR_TIERS:
+          type: string
+          description: |
+            *pays.geoCode* : Pays de l'adresse (correspond à un code stocké dans le référentiel)
+        STTS_ADR_TIERS:
+          type: string
+        DATE_INAC_ADR_TIERS:
+          type: string
+          description: |
+            *techDteDeDesc* : Date de désactivation de l'adresse
+          format: 'YYYY-MM-DDTHH24:MM:SS'
+          example: '2022-12-27T14:38:42'
+        UTLS_CRE_ADR_TIERS:
+          type: string
+          description: Utilisateur de création de l'adresse (champ non modifiable)
+        DATE_CRE_ADR_TIERS:
+          type: string
+          description: Date de création de l'adresse (champ non modifiable)
+          format: 'YYYY-MM-DDTHH24:MM:SS'
+          example: '2022-12-27T14:38:42'
+        UTLS_MOD_ADR_TIERS:
+          type: string
+          description: Utilisateur de modification de l'adresse (champ non modifiable)
+        DATE_MOD_ADR_TIERS:
+          type: string
+          description: Date de modification de l'adresse (champ non modifiable)
+          format: 'YYYY-MM-DDTHH24:MM:SS'
+          example: '2022-12-27T14:38:42'
+        EMAIL_PRINCIPALE:
+          type: string
+          description: |
+            *emailPrincipale* : Adresse email principale liée à l'adresse
+          example: 'contact@cgi.com'
+        EMAIL_SECONDAIRE:
+          type: string
+          description: |
+            *emailSecondaire* : Adresse email secondaire liée à l'adresse
+          example: 'contact2@cgi.com'
+        TELEPHONE_FIXE:
+          type: string
+          description: |
+            *telephoneFixe* : Numéro de téléphone fix lié à l'adresse
+          example: '+33320202020'
+        TELEPHONE_PORTABLE:
+          type: string
+          description: |
+            *telephonePortable* : Numéro de téléphone portable lié à l'adresse
+          example: '+33660606060'
+        FAX:
+          type: string
+          description: |
+            *fax* : Numéro de fax lié à l'adresse
+      example:
+        IDT_ADR_TIERS: "1000"
+        NUM_VOIE_ADR_TIERS: "145"
+        TYPE_VOIE_ADR_TIERS: RUE
+        NOM_VOIE_ADR_TIERS: du Breuil
+        CP_ADR_TIERS: "59000"
+        COMN_ADR_TIERS: Lille
+    TELTIER:
+      title: TELTIER
+      description: Téléphone du tiers
+      type: object
+      required:
+        - IDT_MAILTIERS
+        - TYPE_TEL_TIERS
+        - NUM_TEL_TIERS
+      properties:
+        IDT_TEL_TIERS:
+          type: string
+          description: |
+            *rowIdObject* : Identifiant MDM du téléphone
+        SRC_KEY:
+          type: string
+          description: |
+            *key.sourceKey* : Identifiant du téléphone dans l'application source
+        TYPE_TEL_TIERS:
+          type: string
+          description: |
+            *typeNum.code* : Type du téléphone (Fix, portable, correspond à un code stocké dans le référentiel)
+          example: 'PORT'
+        NUM_TEL_TIERS:
+          type: string
+          description: |
+            *num* : Numéro de téléphone
+          example: '+33660606060'
+        STTS_TEL_TIERS:
+          type: string
+        DATE_INAC_TEL_TIERS:
+          type: string
+          description: |
+            *techDteDeDesc* : Date de désactivation du téléphone
+          format: 'YYYY-MM-DDTHH24:MM:SS'
+          example: '2022-12-27T14:38:42'
+        UTLS_CRE_TEL_TIERS:
+          type: string
+          description: Utilisateur de création du téléphone (champ non modifiable)
+        DATE_CRE_TEL_TIERS:
+          type: string
+          description: Date de création du téléphone (champ non modifiable)
+          format: 'YYYY-MM-DDTHH24:MM:SS'
+          example: '2022-12-27T14:38:42'
+        UTLS_MOD_TEL_TIERS:
+          type: string
+          description: Utilisateur de modification du téléphone (champ non modifiable)
+        DATE_MOD_TEL_TIERS:
+          type: string
+          description: Date de modification du téléphone (champ non modifiable)
+          format: 'YYYY-MM-DDTHH24:MM:SS'
+          example: '2022-12-27T14:38:42'
+      example:
+        IDT_TEL_TIERS: "220002"
+        TYPE_TEL_TIERS: PORT
+        NUM_TEL_TIERS: +33615987485
+    EMAILTIER:
+      title: EMAILTIER
+      description: Adresse email du tiers
+      required:
+        - IDT_MAILTIERS
+        - ADR_MAIL_TIERS
+      type: object
+      properties:
+        IDT_MAILTIERS:
+          type: string
+          description: |
+            *rowIdObject* : Identifiant MDM de l'adresse email
+        SRC_KEY:
+          type: string
+          description: |
+            *key.sourceKey* : Identifiant de l'adresse email dans l'application source
+        ADR_MAIL_TIERS:
+          type: string
+          description: |
+            *email* : Adresse email
+          example: 'contact@cgi.com'
+        STTS_MAIL_TIERS:
+          type: string
+        DATE_INAC_MAIL_TIERS:
+          type: string
+          description: |
+            *techDteDeDesc* : Date de désactivation de l'adresse email
+          format: 'YYYY-MM-DDTHH24:MM:SS'
+          example: '2022-12-27T14:38:42'
+        UTLS_CRE_MAIL_TIERS:
+          type: string
+          description: Utilisateur de création de l'adresse email
+        DATE_CRE_MAIL_TIERS:
+          type: string
+          description: Date de création de l'adresse email
+          format: 'YYYY-MM-DDTHH24:MM:SS'
+          example: '2022-12-27T14:38:42'
+        UTLS_MOD_MAIL_TIERS:
+          type: string
+          description: Utilisateur de modification de l'adresse email
+        DATE_MOD_MAIL_TIERS:
+          type: string
+          description: Date de modification de l'adresse email
+          format: 'YYYY-MM-DDTHH24:MM:SS'
+          example: '2022-12-27T14:38:42'
+        IND_PRC:
+          type: boolean
+          description: |
+            *indPrc* : Indique si l'email est principale ou non (il ne peut y avoir qu'une seule adresse email principale)
+          example: 1
+      example:
+        IDT_MAILTIERS: "200002"
+        ADR_MAIL_TIERS: test123@ancv.fr
+    ACTIVITETIER:
+      title: ACTIVITETIER
+      description: Activité du tiers
+      required:
+        - IDT_ACTIV_TIERS
+        - CODE_ROLE_ACTIV_TIERS
+        - CODE_SEC_ACTIV_TIERS
+        - DATE_ACT_ACTIV_TIERS
+      type: object
+      properties:
+        IDT_ACTIV_TIERS:
+          type: string
+          description: |
+            *rowIdObject* : Identifiant MDM de l'activité
+        SRC_KEY:
+          type: string
+          description: |
+            *key.sourceKey* : Identifiant de l'activité dans l'application source
+        CODE_ROLE_ACTIV_TIERS:
+          type: string
+          description: |
+            *role.code* : Code du rôle de l'activité (FOU, CLI, correspond à un code stocké dans le référentiel)
+          example: 'CLI'
+        STTS_ACTIV_TIERS:
+          type: string
+        CODE_SEC_ACTIV_TIERS:
+          type: string
+          description: |
+            *actv.code* : Code de l'activité (FINC, DOM, FIN, correspond à un code stocké dans le référentiel)
+          example: 'DOM'
+        DATE_ACT_ACTIV_TIERS:
+          type: string
+          description: |
+            *dateDebut* : Date de début de l'activité
+          format: 'YYYY-MM-DDTHH24:MM:SS'
+          example: '2022-12-27T14:38:42'
+        DATE_DACT_ACTIV_TIERS:
+          type: string
+          description: |
+            *techDteDeDesc* :  Date de désactivation de l'activité
+          format: 'YYYY-MM-DDTHH24:MM:SS'
+          example: '2022-12-27T14:38:42'
+        IDT_MET_ACTIV_TIERS:
+          type: string
+          description: |
+            *identifiantMetier* : Identifiant métier de l'activité (alimenté notamment par SICAVE)
+        UTLS_CRE_ACTIV_TIERS:
+          type: string
+          description: Utilisateur de création de l'activité (champ non modifiable)
+        DATE_CRE_ACTIV_TIERS:
+          type: string
+          description: Date de création de l'activité (champ non modifiable)
+          format: 'YYYY-MM-DDTHH24:MM:SS'
+          example: '2022-12-27T14:38:42'
+        UTLS_MOD_ACTIV_TIERS:
+          type: string
+          description: Utilisateur de modification de l'activité (champ non modifiable)
+        DATE_MOD_ACTIV_TIERS:
+          type: string
+          description: Date de modification de l'activité (champ non modifiable)
+          format: 'YYYY-MM-DDTHH24:MM:SS'
+          example: '2022-12-27T14:38:42'
+      example:
+        IDT_ACTIV_TIERS: "150004"
+        CODE_ROLE_ACTIV_TIERS: FOU
+        CODE_SEC_ACTIV_TIERS: FIN
+        DATE_ACT_ACTIV_TIERS: '2022-12-27T14:38:42'
+    TELTIERS:
+      title: TELTIERS
+      description: Téléphone du tiers
+      required:
+        - TYPE_TEL_TIERS
+        - NUM_TEL_TIERS
+      type: object
+      properties:
+        TYPE_TEL_TIERS:
+          type: string
+        NUM_TEL_TIERS:
+          type: string
+      example:
+        TYPE_TEL_TIERS: PORT
+        NUM_TEL_TIERS: "+33615977569"
+    ACTIVITETIERS:
+      title: ACTIVITETIERS
+      description: Activité du tiers
+      required:
+        - CODE_ROLE_ACTIV_TIERS
+        - CODE_SEC_ACTIV_TIERS
+        - DATE_ACT_ACTIV_TIERS
+      type: object
+      properties:
+        CODE_ROLE_ACTIV_TIERS:
+          type: string
+        CODE_SEC_ACTIV_TIERS:
+          type: string
+        DATE_ACT_ACTIV_TIERS:
+          type: string
+      example:
+        CODE_ROLE_ACTIV_TIERS: "CLI"
+        CODE_SEC_ACTIV_TIERS: "DOM"
+        DATE_ACT_ACTIV_TIERS: "2022-05-02T00:00:00+02:00"
+    rechercheRequest:
+      title: Recherche Tiers
+      required:
+        - nbElementsRetournes
+      type: object
+      properties:
+        IDT_UNIQ_TIERS:
+          type: string
+          description: |
+            *rowIdObject* : Identifiant MDM du tiers
+        IDTS_UNIQ_TIERS:
+          type: array
+          description: |
+            *rowIdObject* : Liste d'identifiants MDM des tiers, permet de rechercher sur plusieurs identifiants différents
+          items:
+            type: string
+        RECHERCHE :
+          type: string
+          description : |
+            *recherche* : Champ de recherche (permet de rechercher sur les champs LIB_CRT_TIERS, SIRET_TIERS, SIREN_TIERS, IDENTIFIANT_METIER en même temps)
+          example: '70204'
+        SIREN_TIERS:
+          type: string
+          description: |
+            *siren* : SIREN du tiers (pour une personne morale ou personne physique avec SIRET)
+          example: '702042755'
+        SIRET_TIERS:
+          type: string
+          description: |
+            *siret* : SIRET du tiers (pour une personne morale ou personne physique avec SIRET)
+          example: '70204275500554'
+        RSOCL_TIERS:
+          type: string
+          description: |
+            *morRaisSocl* : Raison sociale du tiers (pour une personne morale ou une personne physique avec SIRET)
+          example: 'CGI'
+        RCS_TIERS:
+          type: string
+          description: |
+            *morRcs* : Numéro du Registre du Commerce des Sociétés (pour une personne morale ou une personne physique avec SIRET)
+          example: '702042755'
+        TYP_TIERS:
+          type: string
+          description: |
+            *typeTiers.code* : Type de tiers (Physique, Morale)
+        CODE_CAT_TIERS:
+          type: string
+          description: |
+            *categorieTier.code* : Code catégorie du tiers (correpond à un code stocké dans le référentiel)
+          example: '92'
+        PRNM_TIERS:
+          type: string
+        NOM_TIERS:
+          type: string
+          description: |
+            *phyPrnm* : Prénom du tiers (pour une personne physique)
+        DATE_NAISS_TIERS:
+          type: string
+          description: |
+            *phyDteDeNais* : Date de naissance (pour une personne physique)
+          format: 'YYYY-MM-DDTHH24:MM:SS'
+          example: '1985-12-27T14:38:42'
+        CP_ADR_TIERS:
+          type: string
+          description: |
+            *codePost* : Code postal de l'adresse
+          example: '59000'
+        COMN_ADR_TIERS:
+          type: string
+          description: |
+            *ville* : Commune de l'adresse
+          example: 'LILLE'
+        CODE_ROLE_ACTIV_TIERS:
+          type: string
+          description: |
+            *role.code* : Code du rôle de l'activité (FOU, CLI, correspond à un code stocké dans le référentiel)
+          example: 'CLI'
+        CODE_SEC_ACTIV_TIERS:
+          type: string
+          description: |
+            *actv.code* : Code de l'activité (FINC, DOM, FIN, correspond à un code stocké dans le référentiel)
+          example: 'DOM'
+        IDT_MET_ACTIV_TIERS:
+          type: string
+          description: |
+            *identifiantMetier* : Identifiant métier de l'activité (alimenté notamment par SICAVE)
+        ADR_MAIL_TIERS:
+          type: string
+          description: |
+            *email* : Adresse email lié directement au tiers
+          example: 'contact@cgi.com'
+        EMAIL_PRINCIPALE:
+          type: string
+          description: |
+            *emailPrincipale* : Adresse email principale liée à l'adresse
+          example: 'contact@cgi.com'
+        MAT_AGENT_TIERS:
+          type: string
+          description: |
+            *agentMat* : Matricule agent (Identifiant provenant du MDM Tiers) du tiers (pour un agent de VNF)
+          example: '01574582'
+        ACTIF_TIERS:
+          type: string
+        nbElementsRetournes:
+          type: integer
+          description: Nombre de résultats retournés par page
+        offset:
+          type: integer
+          description: |
+            Nombre de résultats à partir duquel la recherche doit commencer.
+            
+            *Exemple :* Si "nbElementsRetournes" = 10 et offset = 0, la première page de résultats sera retournée.
+            Si "nbElementsRetournes" = 10 et offset = 10, la seconde page de résultats sera retournée, etc...
+        token:
+          type: string
+          description: Token de requête communiqué par l'API. Ce dernier doit être retransmis pour pouvoir utiliser le système de pagination
+      example:
+        CP_ADR_TIERS: "59000"
+        nbElementsRetournes: 20
+    EMAILTIERS:
+      title: EMAILTIERS
+      required:
+        - ADR_MAIL_TIERS
+      type: object
+      properties:
+        ADR_MAIL_TIERS:
+          type: string
+      example:
+        ADR_MAIL_TIERS: tes123@test.com
+    retourBasique:
+      title: RetourBasique
+      type: object
+      properties:
+        codeRetour:
+          type: string
+        libErreur:
+          type: string
+      example:
+        codeRetour: "KO"
+        libErreur: "Il faut au minimum une activite"
+  securitySchemes:
+    basic:
+      type: http
+      scheme: basic
+      
+# ==============================================================
+# Sécurité de l'API
+# ==============================================================
+security: []
+tags:
+  - name: Tiers
+    description: ""
+x-headmatter:
+  readable_by:
+    - admin
+    - MDMTiers

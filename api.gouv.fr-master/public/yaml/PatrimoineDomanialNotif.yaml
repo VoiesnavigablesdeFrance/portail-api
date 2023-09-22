@@ -1,0 +1,972 @@
+# ==============================================================
+# Swagger Patrimoine Domanial Notification                                        
+# --------------------------------------------------------------
+# Initialisé par : Claude Mourzelas                           
+# Dernière modification :                                       
+# ==============================================================
+
+# ==============================================================
+# Entête du document
+# ==============================================================
+openapi: 3.0.0
+info:
+  title: Patrimoine Domanial Notif
+  contact: {}
+  version: "1.0"
+  description: |
+    *Cette API permet de récupérer les infos Batiments/Lots/Terrains/Equipement d'Observado
+
+    ---
+    ### <font color=#28005F>L'API est composée de différentes routes permettant de  :</font>
+    ---
+    1. Notifier les modifications issues d'Observado
+    2. ONotifier les modifications issues de Simeo
+
+    ### <font color=#28005F>Securité</font>
+
+    Pour pouvoir effectuer des appels à l'API, il est nécessaire de s'authentifier en Basic auth.
+    Cependant, pour l'API exposé en externe, l'authentification se fait via une clé API gérée par l'API Manager (InterSystems API Manager : KONG).
+
+ 
+servers:
+  - url: http://01sviam-prep1
+    variables: {}
+
+tags:
+  - name: observado
+    description: pivot batiment
+    externalDocs:
+      description: ''
+      url: ''
+  - name: simeo
+    description: pivot equipement
+    externalDocs:
+      description: ''
+      url: ''
+paths:
+  /putOperationPatrimoineObservado:
+    put:
+      tags:
+        - observado
+      summary: Send notification from Observado to Simeo
+      description: ""
+      operationId: putObservado
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/put_notification'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/put_notification'
+        '401':
+          description: Unauthorised
+        '403':
+          description: Forbidden
+        '404':
+          description: the resource does not exist
+      security:
+        - ApiKeyAuth: []
+  /putOperationPatrimoineSimeo:
+    put:
+      tags:
+        - simeo
+      summary: Send notification from Simeo to Observado
+      description: ""
+      operationId: putSimeo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/put_notification'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/notification'
+                  - type: object
+                    properties:
+                      NOT_ID:
+                        type: string
+                        example: "0"
+
+        '401':
+          description: Unauthorised
+        '403':
+          description: Forbidden
+        '404':
+          description: the resource does not exist
+      security:
+        - ApiKeyAuth: []
+components:
+  schemas:
+    put_notification:
+      required:
+        - NOTIFICATION
+      type: object
+      properties:
+        NOTIFICATION:
+          $ref: '#/components/schemas/notification'
+        BATIMENT:
+          $ref: '#/components/schemas/batiment'
+        TERRAIN:
+          $ref: '#/components/schemas/terrain'
+        EQUIPEMENT:
+          $ref: '#/components/schemas/equipement'
+        LOT:
+          $ref: '#/components/schemas/lot'
+        GESTION_IMMO:
+          oneOf:
+            - $ref: '#/components/schemas/BAT_BLOC_GESTION_IMMO'
+            - $ref: '#/components/schemas/LOT_BLOC_GESTION_IMMO'
+      xml:
+        name: put_notification
+    notification:
+      required:
+        - NOT_NOM_PIVOT
+      type: object
+      properties:
+        NOT_NOM_PIVOT:
+          type: string
+          example: "LOT"
+        NOT_OPERATION:
+          type: string
+          example: "CREATION"
+        NOT_DATE_OPERATION:
+          type: integer
+          format: int64
+          example: 1677661019860
+        NOT_USER_OPERATION:
+          type: string
+          example: "OBSERVADO"
+      xml:
+        name: notification
+    batiment:
+      required:
+        - BAT_ID_BATIMENT
+      type: object
+      properties:
+        BAT_ID_BATIMENT:
+          type: integer
+          format: int64
+          example: 37
+        TRN_ID_TERRAIN:
+          type: integer
+          format: int64
+          example: 1
+        BAT_FLAG_SUPPRIME:
+          type: boolean
+          example: true
+        BAT_ID_DIRECTION_TERRITORIALE:
+          type: string
+          example: 
+        BAT_LIB_DIRECTION_TERRITORIALE:
+          type: string
+          example:
+        BAT_ID_UNITE_TERRITORIALE_ITINERAIRE:
+          type: string
+          example:
+        BAT_LIB_UNITE_TERRITORIALE_ITINERAIRE:
+          type: string
+          example:
+        BAT_LIB_BATIMENT:
+          type: string
+          example: Ancienne maison éclusière
+        BAT_LIB_ADRESSE:
+          type: string
+          example: 468 Chemin de l’Ancien Barrage 01140 Mogneneins
+        BAT_ID_NATURE_BATIMENT:
+          type: integer
+          format: int64
+          example: 1
+        BAT_LIB_NATURE_BATIMENT:
+          type: string
+          example: Maison
+        BAT_ID_CONCESSIONNAIRE:
+          type: integer
+          format: int64
+          example: 1
+        BAT_LIB_CONCESSIONNAIRE:
+          type: string
+          example: concessionnaire1
+        BAT_ID_CHORUS:
+          type: integer
+          format: int64
+          example: 10
+        BAT_ID_OSCAR:
+          type: string
+          example:
+        BAT_ID_SCOT:
+          type: string
+          example: 
+        BAT_ID_SIRET:
+          type: string
+          example: 
+        BAT_ID_SOURCE_ESTIMA_VALEUR_VENALE:
+          type: integer
+          format: int64
+          example: 10
+        BAT_LIB_SOURCE_ESTIMA_VALEUR_VENALE:
+          type: string
+          example:
+        BAT_DATE_ESTIMA_VALEUR_VENALE:
+          type: number
+          example: 1676297187768
+        BAT_MNT_VALEUR_VENALE:
+          type: number
+          format: float
+          example: 10.5
+        BAT_ID_MOTIF_SORTIE:
+          type: number
+          example: 1
+        BAT_LIB_MOTIF_SORTIE:
+          type: string
+          example:
+        BAT_CODE_MOTIF_SORTIE:
+          type: string
+          example:
+        BAT_FLAG_SELECT_MOTIF_SORTIE:
+          type: boolean
+          example: true
+        BAT_DATE_CREATION:
+          type: number
+          example: 1676297187768
+        BAT_USER_CREATION:
+          type: string
+          example: user1
+        BAT_DATE_MODIFICATION:
+          type: number
+          example: 1676297187768
+        BAT_USER_MODIFICATION:
+          type: string
+          example: user2
+        GEO_CODE_TYPE_GEOMETRIE:
+          type: string
+          example: "polygon"
+        GEOMETRIE:
+          oneOf:
+           - $ref: '#/components/schemas/GEOMETRIE_POINT'
+           - $ref: '#/components/schemas/GEOMETRIE_LINE'
+           - $ref: '#/components/schemas/GEOMETRIE_POLYGON'
+        BAT_BLOC_GESTION_IMMO:
+          $ref: '#/components/schemas/BAT_BLOC_GESTION_IMMO'
+      xml:
+        name: batiment
+    equipement:
+      required:
+        - EQT_ID_EQUIPEMENT
+      type: object
+      properties:
+        EQT_ID_EQUIPEMENT:
+          type: integer
+          format: int64
+          example: 10
+        EQT_FLAG_SUPPRIME:
+          type: boolean
+          example: true  
+        TRN_ID_DIRECTION_TERRITORIALE:
+          type: string
+          example: 
+        TRN_LIB_DIRECTION_TERRITORIALE:
+          type: string
+          example: 
+        TRN_ID_UNITE_TERRITORIALE_ITINERAIRE:
+          type: string
+          example:   
+        TRN_LIB_UNITE_TERRITORIALE_ITINERAIRE:
+          type: string
+          example: 
+        EQT_LIB_EQUIPEMENT:
+          type: string
+          example:
+        EQT_LIB_COMPLEMENT_INFO:
+          type: string
+          example:
+        EQT_ID_NATURE_EQUIPEMENT:
+          type: integer
+          format: int64
+          example: 1  
+        EQT_LIB_NATURE_EQUIPEMENT:
+          type: string
+          example:
+        EQT_LIB_CATEG_NATURE_EQUIPEMENT:
+          type: string
+          example:
+        EQT_ID_ETAT_EQUIPEMENT:
+          type: integer
+          format: int64
+          example: 1 
+        EQT_LIB_ETAT_EQUIPEMENT:
+          type: string
+          example:
+        EQT_QTE_LONGUEUR:
+          type: number
+          format: float
+          example: 10.5  
+        EQT_QTE_SURFACE_SOL:
+          type: number
+          format: float
+          example: 10.5   
+        EQT_DATE_CREATION:
+          type: number
+          example: 1676297187768
+        EQT_USER_CREATION:
+          type: string
+          example: user2
+        EQT_DATE_MODIFICATION:
+          type: number
+          example: 1676297187768
+        EQT_USER_MODIFICATION:
+          type: string
+          example: user1
+        EQT_ID_MOTIF_SORTIE:
+          type: number
+          example: 1
+        EQT_LIB_MOTIF_SORTIE:
+          type: string
+          example:
+        EQT_CODE_MOTIF_SORTIE:
+          type: string
+          example:
+        EQT_FLAG_SELECT_MOTIF_SORTIE:
+          type: boolean
+          example: true
+        GEO_CODE_TYPE_GEOMETRIE:
+          type: string
+          example: "point"
+        GEOMETRIE:
+          oneOf:
+           - $ref: '#/components/schemas/GEOMETRIE_POINT'
+           - $ref: '#/components/schemas/GEOMETRIE_LINE'
+           - $ref: '#/components/schemas/GEOMETRIE_POLYGON'
+      xml:
+        name: equipement
+    lot:
+      required:
+        - LOT_ID_LOT
+      type: object
+      properties:
+        LOT_ID_LOT:
+          type: integer
+          format: int64
+          example: 1
+        BAT_ID_BATIMENT:
+          type: integer
+          format: int64
+          example: 1
+        LOT_FLAG_SUPPRIME:
+          type: boolean
+          example: true
+        BAT_ID_DIRECTION_TERRITORIALE:
+          type: string
+          example: 
+        BAT_LIB_DIRECTION_TERRITORIALE:
+          type: string
+          example: 
+        BAT_ID_UNITE_TERRITORIALE_ITINERAIRE:
+          type: string
+          example:
+        BAT_LIB_UNITE_TERRITORIALE_ITINERAIRE:
+          type: string
+          example:
+        LOT_LIB_LOT:
+          type: string
+          example:
+        LOT_ID_STATUT:
+          type: integer
+          format: int64
+          example: 1
+        LOT_LIB_STATUT:
+          type: string
+          example:
+        LOT_LIB_LOCALISATION:
+          type: string
+          example: 
+        LOT_ID_DESTINATION:
+          type: integer
+          format: int64
+          example: 1
+        LOT_LIB_DESTINATION:
+          type: string
+          example:
+        LOT_LIB_COMPLEMENT_DESTINATION:
+          type: string
+          example: 
+        LOT_LIB_CATEGORIE_DESTINATION:
+          type: string
+          example:
+        LOT_ID_SOURCE_ESTIMATION_VL_ANNUELLE_REF:
+          type: integer
+          format: int64
+          example: 1
+        LOT_LIB_SOURCE_ESTIMATION_VL_ANNUELLE_REF:
+          type: string
+          example:
+        LOT_MNT_VALEUR_LOCATIVE_CADASTRALE:
+          type: number
+          format: float
+          example: 10.5
+        LOT_MNT_VALEUR_LOCATIVE_ANNUELLE_REF:
+          type: number
+          format: float
+          example: 10.5
+        LOT_DATE_ESTIMATION_VALEUR_LOCATIVE_ANNUELLE_REF:
+          type: number
+          example: 1676297187768
+        LOT_ID_MOTIF_SORTIE:
+          type: number
+          example: 1
+        LOT_LIB_MOTIF_SORTIE:
+          type: string
+          example:
+        LOT_CODE_MOTIF_SORTIE:
+          type: string
+          example:
+        LOT_FLAG_SELECT_MOTIF_SORTIE:
+          type: boolean
+          example: true
+        LOT_LIB_GEDO_NOM_OCCUPANT:
+          type: string
+          example:
+        LOT_LIB_GEDO_GRADE_AGENT:
+          type: string
+          example:
+        LOT_LIB_GEDO_AGENT_RETRAITE:
+          type: string
+          example:
+        LOT_DATE_GEDO_AFFECTATION:
+          type: number
+          example: 1676297187768
+        LOT_DATE_GEDO_ECHEANCE_CONTRAT:
+          type: number
+          example: 1676297187768
+        LOT_PCT_RATIO_BATIMENT:
+          type: number
+          example: 1
+        LOT_DATE_CREATION:
+          type: number
+          example: 1676297187768
+        LOT_USER_CREATION:
+          type: string
+          example: user1
+        LOT_DATE_MODIFICATION:
+          type: number
+          example: 1676297187768
+        LOT_USER_MODIFICATION:
+          type: string
+          example: user2
+        LOT_BLOC_GESTION_IMMO:
+          $ref: '#/components/schemas/LOT_BLOC_GESTION_IMMO'
+      xml:
+        name: lot
+    terrain:
+      required:
+        - TRN_ID_TERRAIN
+      type: object
+      properties:
+        TRN_ID_TERRAIN:
+          type: integer
+          format: int64
+          example: 10
+        TRN_FLAG_SUPPRIME:
+          type: boolean
+          example: true
+        TRN_ID_DIRECTION_TERRITORIALE:
+          type: string
+          example:
+        TRN_LIB_DIRECTION_TERRITORIALE:
+          type: string
+          example: 
+        TRN_ID_UNITE_TERRITORIALE_ITINERAIRE:
+          type: string
+          example: 
+        TRN_LIB_UNITE_TERRITORIALE_ITINERAIRE:
+          type: string
+          example: 
+        TRN_LIB_TERRAIN:
+          type: string
+          example: 
+        TRN_LIB_LIEU_DIT:
+          type: string
+          example: 
+        TRN_LIB_VOIE_EAU:
+          type: string
+          example: 
+        TRN_LIB_RIVE:
+          type: string
+          example: 
+        TRN_ID_NATURE_TERRAIN:
+          type: integer
+          format: int64
+          example: 10
+        TRN_LIB_NATURE_TERRAIN:
+          type: string
+          example: 
+        TRN_ID_TYPE_CONTRAT:
+          type: integer
+          format: int64
+          example: 10
+        TRN_LIB_TYPE_CONTRAT:
+          type: string
+          example: 
+        TRN_CODE_TYPE_CONTRAT:
+          type: string
+          example: 
+        TRN_NUM_ORDRE_TYPE_CONTRAT:
+          type: string
+          example: 
+        TRN_ID_CONCESSIONNAIRE:
+          type: integer
+          format: int64
+          example: 10
+        TRN_LIB_CONCESSIONNAIRE:
+          type: string
+          example: 
+        TRN_ID_UNITE_FONCTIONNELLE:
+          type: integer
+          format: int64
+          example: 10
+        TRN_LIB_UNITE_FONCTIONNELLE:
+          type: string
+          example: 
+        TRN_CODE_INSEE:
+          type: string
+          example: 
+        TRN_FLAG_CONSTRUCTIBLE:
+          type: boolean
+          example: true
+        TRN_FLAG_VIABILISE:
+          type: boolean
+          example: true
+        TRN_FLAG_CADASTRE:
+          type: boolean
+          example: true
+        TRN_CODE_REF_CADASTRE:
+          type: string
+          example: 
+        TRN_QTE_SURFACE_SOL:
+          type: number
+          format: float
+          example: 10.2
+        TRN_MNT_VALEUR_VENALE:
+          type: integer
+          format: int64
+          example: 10
+        TRN_ID_CHORUS:
+          type: integer
+          format: int64
+          example: 10
+        TRN_CODE_SITE_CHORUS:
+          type: string
+          example: 
+        TRN_CODE_FONCTION_SITE_CHORUS:
+          type: string
+          example: 
+        TRN_CODE_GEDO_TYPE_CONTRAT:
+          type: string
+          example: 
+        TRN_ID_OSCAR:
+          type: string
+          example: 
+        TRN_ID_SCOT:
+          type: string
+          example: 
+        TRN_LIB_GEDO_PETITIONNAIRE:
+          type: string
+          example: 
+        TRN_CODE_GEDO_CONTRAT:
+          type: string
+          example: 
+        TRN_DATE_GEDO_ECHEANCE_CONTRAT:
+          type: number
+          example: 1676297187768
+        TRN_DATE_CREATION:
+          type: number
+          example: 1676297187768
+        TRN_USER_CREATION:
+          type: string
+          example: 
+        TRN_DATE_MODIFICATION:
+          type: number
+          example: 1676297187768
+        TRN_USER_MODIFICATION:
+          type: string
+          example: 
+        TRN_ID_MOTIF_SORTIE:
+          type: number
+          example: 1
+        TRN_LIB_MOTIF_SORTIE:
+          type: string
+          example:
+        TRN_CODE_MOTIF_SORTIE:
+          type: string
+          example:
+        TRN_FLAG_SELECT_MOTIF_SORTIE:
+          type: boolean
+          example: true
+        GEO_CODE_TYPE_GEOMETRIE:
+          type: string
+          example: "line"
+        GEOMETRIE:
+          oneOf:
+           - $ref: '#/components/schemas/GEOMETRIE_POINT'
+           - $ref: '#/components/schemas/GEOMETRIE_LINE'
+           - $ref: '#/components/schemas/GEOMETRIE_POLYGON'
+      xml:
+        name: terrain
+    LOT_BLOC_GESTION_IMMO:
+      type: object
+      properties:
+        LOT_ID_ETAT_LOT:
+          type: integer  
+          example: 1
+        LOT_LIB_ETAT_LOT:
+          type: string  
+          example: 
+        LOT_CODE_ARRETE:
+          type: string  
+          example: 
+        LOT_ID_FONCTION_NAS:
+          type: integer  
+          example: 1
+        LOT_ID_FONCTION_COPA:
+          type: integer  
+          example: 1
+        LOT_ID_CONFORMITE_ASSAINISSEMENT:
+          type: integer  
+          example: 1
+        LOT_LIB_CONFORMITE_ASSAINISSEMENT:
+          type: string  
+          example: 
+        LOT_ID_TYPE_ASSAINISSEMENT:
+          type: integer  
+          example: 1
+        LOT_LIB_TYPE_ASSAINISSEMENT:
+          type: string  
+          example: 
+        LOT_ID_ELEC_CONTROLE:
+          type: integer  
+          example: 1
+        LOT_LIB_ELEC_CONTROLE:
+          type: string  
+          example: 
+        LOT_ID_ELEC_RESERVE:
+          type: integer  
+          example: 1
+        LOT_LIB_ELEC_RESERVE:
+          type: string  
+          example: 
+        LOT_DATE_DERNIER_DIAG_ELEC:
+          type: integer
+          example: 21676297187768
+        LOT_ID_GAZ_CONTROLE:
+          type: integer  
+          example: 1
+        LOT_LIB_GAZ_CONTROLE:
+          type: string  
+          example: 
+        LOT_ID_GAZ_RESERVE:
+          type: integer  
+          example: 1
+        LOT_LIB_GAZ_RESERVE:
+          type: string  
+          example: 
+        LOT_ID_ENERGIE_CHAUFFAGE:
+          type: integer  
+          example: 1
+        LOT_LIB_ENERGIE_CHAUFFAGE:
+          type: string  
+          example: 
+        LOT_ID_RESEAU_EAU_POTABLE:
+          type: integer  
+          example: 1
+        LOT_LIB_RESEAU_EAU_POTABLE:
+          type: string  
+          example: 
+        LOT_ID_ETAT_SANTEE:
+          type: integer  
+          example: 1
+        LOT_LIB_ETAT_SANTEE:
+          type: string  
+          example: 
+        LOT_ID_FREQUENCE_USAGE_INDUSTRIEL:
+          type: integer  
+          example: 1
+        LOT_LIB_FREQUENCE_USAGE_INDUSTRIEL:
+          type: string  
+          example: 
+        LOT_ID_ACCESSIBILITE_HANDICAPE:
+          type: integer  
+          example: 1
+        LOT_LIB_ACCESSIBILITE_HANDICAPE:
+          type: string  
+          example: 
+        LOT_ID_APPLICATION_5S:
+          type: integer  
+          example: 1
+        LOT_LIB_APPLICATION_5S:
+          type: string  
+          example: 
+        LOT_FLAG_HABITABLE:
+          type: boolean  
+          example: true
+        LOT_FLAG_NAS:
+          type: boolean  
+          example: true
+        LOT_FLAG_ETAB_RECEVANT_PUBLIC:
+          type: boolean  
+          example: true
+        LOT_FLAG_UTILITE_SERVICE:
+          type: boolean  
+          example: true
+        LOT_QTE_EFFECTIF_AGENT:
+          type: integer  
+          example: 1
+        LOT_QTE_POSTE_TRAVAIL:
+          type: integer  
+          example: 1
+        LOT_QTE_PIECE_PRINCIPALE:
+          type: integer  
+          example: 1
+        LOT_QTE_SURFACE_UTILE_BRUTE:
+          type: number
+          format: float
+          example: 10.5
+        LOT_QTE_SURFACE_UTILE_NET:
+          type: number
+          format: float
+          example: 10.5
+        LOT_QTE_SURFACE_HABITABLE:
+          type: number
+          format: float
+          example: 10.5         
+    BAT_BLOC_GESTION_IMMO:
+      type: object
+      properties:
+        BAT_ID_ETAT_BATIMENT:
+          type: integer  
+          example: 1
+        BAT_LIB_ETAT_BATIMENT:
+          type: string  
+          example: 
+        BAT_ID_STATUT_FONCIER:
+          type: integer  
+          example: 1 
+        BAT_LIB_STATUT_FONCIER:
+          type: string  
+          example: 
+        BAT_DATE_ANNE_CONSTRUCTION:
+          type: integer
+          example: 1676297187768
+        BAT_QTE_NIVEAU:
+          type: integer  
+          example: 1
+        BAT_QTE_PLACES_PARKING:
+          type: integer  
+          example: 1
+        BAT_QTE_SURFACE_HABITABLE:
+          type: number
+          format: float  
+          example: 1.2
+        BAT_QTE_SURFACE_PLANCHER:
+          type: number
+          format: float  
+          example: 1.4
+        BAT_QTE_SURFACE_EMPRISE_SOL:
+          type: number
+          format: float 
+          example: 100.5
+        BAT_QTE_SURFACE_TOIT:
+          type: number
+          format: float
+          example: 150.3
+        BAT_QTE_SURFACE_UTILE_BRUTE:
+          type: number
+          format: float
+          example: 10.5
+        BAT_FLAG_DEJA_INONDE:
+          type: boolean  
+          example: true
+        BAT_FLAG_PRESENCE_ENQUETE:
+          type: boolean  
+          example: true
+        BAT_FLAG_TRI_SELECTIF:
+          type: boolean  
+          example: true
+        BAT_FLAG_CLASSE_MONUMENT_HISTORIQUE:
+          type: boolean  
+          example: 10
+        BAT_ID_ACCESSIBILITE_BATIMENT:
+          type: integer  
+          example: 10
+        BAT_LIB_ACCESSIBILITE_BATIMENT:
+          type: string  
+          example: 
+        BAT_ID_ACCESSIBILITE_TRANSPORT:
+          type: integer  
+          example: 10
+        BAT_LIB_ACCESSIBILITE_TRANSPORT:
+          type: string  
+          example: 
+        BAT_ID_ASCENSEUR_CONTROLE:
+          type: integer  
+          example: 10
+        BAT_LIB_ASCENSEUR_CONTROLE:
+          type: string  
+          example: 
+        BAT_ID_ASCENSEUR_RESERVE:
+          type: integer  
+          example: 10
+        BAT_LIB_ASCENSEUR_RESERVE:
+          type: string  
+          example:
+        BAT_ID_PORTAIL_BARRIERE:
+          type: integer  
+          example: 10
+        BAT_LIB_PORTAIL_BARRIERE:
+          type: string  
+          example:
+        BAT_ID_SYSTEME_ANTIINTRUSION:
+          type: integer  
+          example: 10
+        BAT_LIB_SYSTEME_ANTIINTRUSION:
+          type: string  
+          example:
+        BAT_ID_SECU_INCENDIE_CONTROLE:
+          type: integer  
+          example: 10
+        BAT_LIB_SECU_INCENDIE_CONTROLE:
+          type: string  
+          example:
+        BAT_ID_SECU_INCENDIE_RESERVE:
+          type: integer  
+          example: 10
+        BAT_LIB_SECU_INCENDIE_RESERVE:
+          type: string  
+          example:
+        BAT_ID_CHOIX_STRATEGIQUE:
+          type: integer  
+          example: 10
+        BAT_LIB_CHOIX_STRATEGIQUE:
+          type: string  
+          example:
+        BAT_ID_PRESENCE_EXTINCTEUR:
+          type: integer  
+          example: 10
+        BAT_LIB_PRESENCE_EXTINCTEUR:
+          type: string  
+          example:
+        BAT_FLAG_ACCESSIBILITE_BATIMENT:
+          type: boolean  
+          example: true
+        BAT_FLAG_ACCESSIBILITE_TRANSPORT:
+          type: boolean  
+          example: true
+        BAT_FLAG_ASCENSEUR_CONTROLE:
+          type: boolean  
+          example: true
+        BAT_FLAG_ASCENSEUR_RESERVE:
+          type: boolean  
+          example: true
+        BAT_FLAG_PORTAIL_BARRIERE:
+          type: boolean  
+          example: 10
+        BAT_FLAG_SYSTEME_ANTIINTRUSION:
+          type: boolean  
+          example: 10
+        BAT_FLAG_SECU_INCENDIE_CONTROLE:
+          type: boolean  
+          example: true
+        BAT_FLAG_SECU_INCENDIE_RESERVE:
+          type: boolean  
+          example: true
+        BAT_FLAG_CHOIX_STRATEGIQUE:
+          type: boolean  
+          example: true
+        BAT_FLAG_PRESENCE_EXTINCTEUR:
+          type: boolean  
+          example: true
+        BAT_FLAG_ICPE:
+          type: boolean  
+          example: true
+        BAT_CODE_NIVEAU_ICPE:
+          type: string  
+          example: 
+        BAT_CODE_RESEAU_ELECTRIQUE:
+          type: integer  
+          example: 10
+        BAT_LIB_RESEAU_ELECTRIQUE:
+          type: string  
+          example:
+        BAT_CODE_RESEAU_GAZ:
+          type: integer  
+          example: 10
+        BAT_LIB_RESEAU_GAZ:
+          type: string  
+          example:
+        BAT_CODE_COMPTEUR_ELECTRIQUE:
+          type: string  
+          example: 
+        BAT_CODE_COMPTEUR_GAZ:
+          type: string  
+          example: 
+        BAT_CODE_COMPTEUR_EAU:
+          type: string  
+          example: 
+    GEOMETRIE_POINT:
+      type: object
+      properties:
+        GEO_TAB_COORDONNES:
+            type: number
+            format: float
+            example: [
+          673993.9987,
+          7048087.2013
+        ]
+      xml:
+        name: GEOMETRIE_POINT
+    GEOMETRIE_LINE:
+      type: object
+      properties:
+        GEO_TAB_COORDONNES:
+            type: array
+            items:
+              type: number
+              format: float
+            example:
+               - [675221.6371,7049913.2718]
+               - [675149.6053,7049998.3874]
+      xml:
+        name: GEOMETRIE_LINE
+    GEOMETRIE_POLYGON:
+      type: object
+      properties:
+        GEO_TAB_COORDONNES:
+          type: array
+          items:
+            type: array
+            items:
+              type: array
+              items:
+                type: number
+                format: float
+              example:
+                - [675221.6371,7049913.2718]
+                - [675149.6053,7049998.3874]
+      xml:
+        name: GEOMETRIE_POLYGON
+  securitySchemes:
+    basic:
+      type: http
+      scheme: basic
+  x-headmatter:
+  readable_by:
+    - admin
+    - patrimoine         

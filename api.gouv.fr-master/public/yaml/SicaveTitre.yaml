@@ -1,0 +1,293 @@
+openapi: 3.0.0
+info:
+  title: SicaveTitre
+  contact: {}
+  version: '1.0'
+  description: >
+    *Cette API permet les échanges avec le service SICAVE Titre*.
+
+
+    ---
+
+
+    ### <font color=#28005F>L'API est composée des routes suivantes :</font>
+
+    ---------
+
+    1. Consultation d'un titre
+
+    2. Création d'un prétitre
+
+    3. Envoyer un document dans SICAVE
+
+    4. Récupérer un document depuis SICAVE vers 1 répertoire partagé
+
+
+    ### <font color=#28005F>Securité</font>
+
+
+    Pour pouvoir effectuer des appels à l'API, il est nécessaire de
+    s'authentifier en Basic authentification
+servers:
+  - url: 'http://01sviam-prep1'
+    variables: {}
+paths:
+  /titre/envoiDocSicave:
+    post:
+      security:
+        - basicAuth: []
+      tags:
+        - APITitre
+      summary: Dépose d'un document
+      description: |
+        ### Paramètres :
+        **gExCod** : [1]\
+        **gN1Cod** : [1]\
+        **gN2Cod** : [1]\
+        **eXxId** : [1]\
+        **eXxTyp** : [1]\
+        **nameSirepa** : [1]\
+        \
+        [1] Obligatoire
+      operationId: envoiDocSicave
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/envoiDocSicave'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema : {}
+              example :
+                  codeRetour : "OK"
+                  codeStatus : 200
+  /titre/recuperationDocSicave:
+    post:
+      security:
+        - basicAuth: []
+      tags:
+        - APITitre
+      summary: Récupération d'un document
+      description: |
+        ### Paramètres :
+        **gExCod** : [1]\
+        **gN1Cod** : [1]\
+        **gN2Cod** : [1]\
+        **eXxId** : [1]\
+        **eXxTyp** : [1]\
+        **nameSirepa** : [1]\
+        **commentaire** : [1]\
+        **mimeType** : [1]\
+        **Base64File** : [1]\
+        \
+        ### Depose du document :
+               Ce document est déposé dans 1 répertoire partagé.
+        [1] Obligatoire
+      operationId: recuperationDocSicave
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/recuperationDocSicave'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema : {}
+              example :
+                  codeRetour : "OK"
+                  libErreur : ""
+                  codeErreur :
+  /titre/{numero}:
+    get:
+      security:
+        - basicAuth: []
+      tags:
+        - APITitre
+      summary: Consultation d'un titre
+      description: Consultation d'un titre
+      operationId: getTitre
+      parameters:
+        - name: numero
+          in: path
+          description: numéro de titre
+          required: true
+          schema:
+            type: string
+            example: SCOT0372740
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: {}
+              example:
+                codeRetour: OK
+                codeStatus: 200
+  /titre:
+    put:
+      security:
+        - basicAuth: []
+      tags:
+        - APITitre
+      summary: Création d'un prétitre
+      description: |
+        ##### Paramètres : 
+        * Transfert : liste d'objet "Titre"
+          * Titre : objet contenant les paramètres suivants :
+            * EXCR_CPTL
+            * CODE_ETAB_CPTL
+            * CODE_ORDO_CPTL
+            * UNI_CPTL
+            * NUM_PRE_TIT
+            * STTS_PRE_TIT
+            * LIBTIT
+            * CODE_CLT_SICAV
+            * NUM_ADR_FACT
+            * UTLS_ANNU_ENTR
+            * DATE_ENV_PRE_TIT
+            * ETAT_PAIE
+            * MONT_DET
+            * LIGNE_IMPUTATION : liste d'objet "Ligne" 
+            * Ligne : objet contenant les paramètres suivants :
+                * MNT_RDVC_PRE_TIT 
+                * IDT_LIG_CPTL 
+                * CPT_IMPU_CPTL 
+                * NATURE_RECETTE 
+                * INDCT_PRDUI_CONST 
+                * DATE_DEB_PRDUI_CONST
+                * DATE_FIN_PRDUI_CONST
+                * MNT_PRDUI_CONST 
+      operationId: createTitre
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Titre'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: {}
+              example:
+                codeRetour: OK
+                codeStatus: 200
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+  schemas:
+    envoiDocSicave:
+      type: object
+      properties:
+        gExCod:
+          type: string    
+          example: "2017"
+        gN1Cod:
+          type: string  
+          example: VNF
+        gN2Cod:
+          type: string  
+          example: "11"
+        eXxId:
+          type: string  
+          example: "000185"
+        eXxTyp:
+          type: string  
+          example: "TIT"
+        nameSirepa:
+          type: string  
+          example: "text.txt"
+        mimeType:
+          type: string   
+          example: "text/plain"
+        commentaire:
+          type: string  
+          example: "fichier test"    
+        base64File:
+          type: string 
+          example: "dGVzdA=="   
+    recuperationDocSicave:
+      type: object
+      properties:
+        gExCod:
+          type: string    
+          example: "2017"
+        gN1Cod:
+          type: string  
+          example: VNF
+        gN2Cod:
+          type: string  
+          example: "11"
+        eXxId:
+          type: string  
+          example: "000185"
+        eXxTyp:
+          type: string  
+          example: "TIT"
+        nameSirepa:
+          type: string  
+          example: "text.txt"
+        mimeType:
+          type: string   
+          example: "text/plain"         
+    Titre:
+      type: object
+      properties:
+        EXCR_CPTL:
+          type: string
+        CODE_ETAB_CPTL:
+          type: string
+        CODE_ORDO_CPTL:
+          type: string
+        UNI_CPTL:
+          type: string
+        NUM_PRE_TIT:
+          type: string
+        CODE_CLT_SICAV:
+          type: string
+        MONT_DET:
+          type: string
+        DATE_ENV_PRE_TIT:
+          type: string
+        LIGNE_IMPUTATION:
+          $ref: '#/components/schemas/LIGNE_IMPUTATION'
+    LIGNE_IMPUTATION:
+      type: array
+      items:
+        type: object
+        properties:
+          Ligne:
+            $ref: '#/components/schemas/Ligne'
+    Ligne:
+      type: object
+      properties:
+        MNT_RDVC_PRE_TIT:
+          type: string
+        CPT_IMPU_CPTL:
+          type: string
+        DATE_DEB_PRDUI_CONST:
+          type: string
+        IDT_LIG_CPTL:
+          type: string
+tags:
+  - name: APITitre
+    description: ''
+security:
+  - basicAuth: []
+x-headmatter:
+  readable_by:
+    - admin
+    - SicaveTitre

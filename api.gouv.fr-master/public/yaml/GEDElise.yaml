@@ -1,0 +1,804 @@
+openapi: 3.0.0
+info:
+  title: GEDElise
+  contact: {}
+  version: '1.0'
+  description: |
+    *Cette API permet les échanges avec le service GED Elise*.
+
+    ---
+    
+    ### <font color=#28005F>L'API est composée des routes suivantes :</font>
+    ---------
+    1. Création d'un document 
+    2. Modification d'un document
+    3. Récupération des métadonnées d'un document
+    4. Récupération d'un document
+    5. Recherche de documents
+    6. Liaison de documents
+    7. Récupération des documents liés à un parent
+    8. Création d'une fiche principale
+    9. Signature externe d'un document
+    10. Retour de la signature externe
+    11. Retour de la signature interne
+    12. Relance de message InterSystems
+
+    ### <font color=#28005F>Securité</font>
+
+    Pour pouvoir effectuer des appels à l'API, il est nécessaire de s'authentifier en Basic authentification
+servers:
+- url: http://01sviam-prep1/ged
+  variables: {}
+paths:
+  /document:
+    post:
+      security:
+        - basicAuth: []
+      tags:
+      - GED
+      summary: Création d'un document
+      description: |
+        ### Paramètres :
+        **nomCasier** : [2]\
+        Nom de casier Elise, l’application doit connaitre et fournir ce nom de casier.\
+        **metadonnees** : [2]\
+        Valeurs de métadonnées envoyées configurées dans le mapping Elise.\
+        Dans le cas du mode asynchrone, la métadonnée « CP_SYSTEM » est obligatoire, puisqu’elle permet d’identifier à qui envoyer la réponse.\
+        **fichier** : [1]\
+        Stream du fichier encodé en base64.\
+        **nomProcedure** : [2]\
+        Nom de la procédure.\
+        **emailContact** : [2]\
+        Email de contact de la procédure.\
+        **nomFichier** : [1]\
+        Nom du fichier dans Elise.\
+        **async** : (par défaut : true)\
+        Création en mode asynchrone.\
+        Si le paramètre est à false, le web service ne répondra que lorsque le document sera créé dans la GED.
+        Si le paramètres est à true ou non renseigné, le web service répondra une fois la demande de création prise en compte et appellera le web service exposé par l’application consommatrice lorsque le fichier sera en ligne dans la GED.\
+        **procedureID** : \
+        Identifiant de procédure à laquelle lier le document.
+        Si cet identifiant n’est pas renseigné, une nouvelle procédure sera créée
+        Cela permet le multi pièces jointes dans une procédure\
+        \
+        [1] Obligatoire\
+        [2] Obligatoire si procedureID n'est pas renseigné
+
+
+      operationId: createDocument
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/creationDocumentRequest'
+      responses:
+        '201':
+          description: ok
+          content:
+            application/json:
+              schema : {}
+              example :
+                  codeRetour : "OK"
+                  codeStatus : 201
+                  procedureID : 'COURRIERS_81224'
+                  documentID : 'WCDOCUMENTS_149384'
+  
+  /document/{procedureID}/metadonnees:
+    patch:
+      security:
+        - basicAuth: []
+      tags:
+      - GED
+      summary: Modification d'un document
+      description: |
+        ### Paramètres :
+        **nomCasier** : [1]\
+        Nom de casier Elise, l’application doit connaitre et fournir ce nom de casier.\
+        **metadonnees** : [1]\
+        Valeurs de métadonnées envoyées configurées dans le mapping Elise.\
+        \
+        [1] Obligatoire
+      
+      operationId: modifyDocument
+      parameters:
+        - name: procedureID
+          in: path
+          description: rowidobject de la procédure (procedureID)
+          required : true
+          schema:
+            type: string
+            example: 'COURRIERS_84987'
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/modificationDocumentRequest'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema : {}
+              example :
+                  codeRetour : "OK"
+                  codeStatus : 200
+    
+    get:
+      security:
+        - basicAuth: []
+      tags:
+      - GED
+      summary: Récupération des métadonnées d’un document par son procedureID
+      description : ""
+      
+      operationId: getMetadonneesDocument
+      parameters:
+      - name: procedureID
+        in: path
+        description: rowidobject de la procédure (procedureID)
+        required : true
+        schema:
+          type: string
+          example: 'COURRIERS_84987'
+      responses:
+        '200' :
+          description: ok
+          content:
+            application/json:
+              schema : {}
+              example :
+                  codeRetour : "OK"
+                  codeStatus : 200
+                  metadonnees: {"CP_SYSTEM": "GEDO"}
+  
+  /document/{documentID}:
+    get:
+      security:
+        - basicAuth: []
+      tags:
+      - GED
+      summary: Récupération d'un document par son documentID
+      description : ""
+
+      operationId: getDocument
+      parameters:
+      - name: documentID
+        in: path
+        description: rowidobject du document (documentID)
+        required : true
+        schema:
+          type: string
+          example: 'WCDOCUMENTS_151851'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema : {}
+              example :
+                  codeRetour : "OK"
+                  codeStatus : 200
+                  fichier : 'JsOpIicoLcOoX8Onw6ApPQ0KCV5wDQrDiQ0KLDs6IT8uL8KnDQrDuSUNCg=='
+  
+  /rechercheDocument:
+    post:
+      security:
+        - basicAuth: []
+      tags:
+      - GED
+      summary: Recherche d’un ou plusieurs documents 
+      description: |
+        ### Paramètres :
+        **seulementFichePrincipale** : (par défaut : true)\
+        Permet d’activer ou désactiver le filtre sur les fiches principales.\
+        Si le champ est renseignée avec la valeur « true », seules les fiches principales seront retournées par la recherche.\
+        Sinon, toutes les fiches seront retournées, qu’ils s’agissent de fiches principales ou non.\
+        **CP_NUM_USAGER** : [2]\
+        Métadonnée CP_NUM_USAGER.\
+        Dans le cas de GEDO, le ROWID du tiers.\
+        **procedureID** : [2]\
+        Identifiant de procédure dans la GED Elise.\
+        **documentID** : [2]\
+        Identifiant de document dans la GED Elise.\
+        \
+        [2] L’appel de recherche de procédure doit contenir au moins l’un des paramètres.
+
+        
+      operationId: search
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/rechercheDocumentRequest'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema : {}
+              example :
+                  codeRetour : "OK"
+                  codeStatus : 200
+  
+  /document/{procedureID}/documents:
+    patch:
+      security:
+        - basicAuth: []
+      tags:
+      - GED
+      summary: Liaison de documents
+      description: |
+        ### Paramètres :
+        **documents** : [1]\
+        Liste des procédures à affecter à la procédure parente. \
+        \
+        [1] Obligatoire
+      operationId: linkDocument
+      parameters:
+        - name: procedureID
+          in: path
+          description: rowidobject de la procédure (procedureID)
+          required : true
+          schema:
+            type: string
+            example: 'COURRIERS_84988'
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/liaisonDocumentRequest'
+            example : 
+                documents : ["COURRIERS_83487"]
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema : {}
+              example :
+                  codeRetour : "OK"
+                  codeStatus : 200
+                  documents: ["COURRIERS_84575"]
+    
+    get:
+      security:
+        - basicAuth: []
+      tags:
+      - GED
+      summary: Récupération des documents liés à un parent
+      description : ""
+
+      operationId: getLinkedDocument
+      parameters:
+        - name: procedureID
+          in: path
+          description: rowidobject de la procédure (procedureID)
+          required : true
+          schema:
+            type: string
+            example: 'COURRIERS_84988'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema : {}
+              example :
+                  codeRetour : "OK"
+                  codeStatus : 200
+                  documentsLies: ["COURRIERS_81202"]
+        '204' :
+          description: ok, no results
+          content:
+            application/json:
+              schema : {}
+              example :
+                  codeRetour : "OK"
+                  codeStatus : 204
+                  documentsLies: [""]
+  
+  /fiche:
+    post:
+      security:
+        - basicAuth: []
+      tags:
+      - GED
+      summary: Création d'une fiche principale
+      description: |
+        ### Paramètres :
+        **nomCasier** : [1]\
+        Nom de casier Elise, l’application doit connaitre et fournir ce nom de casier.\
+        **metadonnees** : [1]\
+        Valeurs de métadonnées envoyées configurées dans le mapping Elise.\
+        **nomProcedure** : [1]\
+        Nom de la procédure.\
+        **emailContact** : [1]\
+        Email de contact de la procédure.\
+        \
+        [1] Obligatoire
+
+      operationId: createProcedure
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/creationFicheRequest'
+      responses:
+        '201':
+          description: ok
+          content:
+            application/json:
+              schema : {}
+              example :
+                  codeRetour : "OK"
+                  codeStatus : 201
+                  procedureID: "COURRIERS_81224"
+
+  /signature/envoiSignature/externe:
+    post:
+      security:
+        - basicAuth: []
+      tags:
+      - GED
+      summary: Signature d'un document
+      description: |
+        ### Paramètres :
+        **sujet** : \
+        Sujet du mail à envoyer pour demander la signature.\
+        Dans le cas où le sujet n’est pas renseigné, un sujet par défaut sera envoyé.\
+        **signataires** : \
+        Liste des signataires.\
+        Au moins un signataire est obligatoire. L’intégralité des champs du signataire doit être renseignée.\
+        **documentID** : [1]\
+        Identifiant de la pièce jointe dans la GED.\
+        Le document est récupéré par l’EAI pour être inséré dans Yousign.\
+        **procedureID** : [1]\
+        Identifiant de la procédure dans la GED.\
+        Le document est récupéré par l’EAI pour être inséré dans Yousign.\
+        **application** : [1]\
+        Nom de l’application à qui envoyer la notification une fois le document signé.\
+        Ce champ doit être renseigné avec la même valeur que le champ « CP_SYSTEM » dans les métadonnées.\
+        **delai** : \
+        Délai (en jours) avant l'expiration de la signature.\
+        Si non renseigné, la signature n'expire jamais.\
+        **message** : \
+        Message du mail à envoyer pour demander la signature.\
+        Dans le cas où le message n’est pas renseigné, un message par défaut sera envoyé.\
+        **optionValidation** : \
+        Objet de configuration de l’envoi de code de validation.\
+        Par defaut, le type de confirmation est par email.\
+        \
+        [1] Obligatoire
+
+
+      operationId: signatureDocument
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/signatureDocumentRequest'
+      responses:
+        '201':
+          description: ok
+          content:
+            application/json:
+              schema : {}
+              example :
+                  codeRetour : "OK"
+                  codeStatus : 201
+                  signatureId : '/procedures/4e08b539-ba32-4c18-83ff-be8294cc00c7'
+                  statut : 'active'
+                  
+  /signature/retourSignature/externe:
+    post:
+      security:
+        - basicAuth: []
+      tags:
+      - GED
+      summary: Retour de la signature externe
+      description: |
+        ### Des informations sont contenues dans les headers
+        **x-ged-appli** : application à contacter \
+        **x-ged-courrier** : id de la procédure \
+        **x-ged-doc** : id de l'ancien document \
+        ### Paramètres :
+        * procedure : objet Yousign
+          * id [1] : identifiant de la procédure Yousign
+          * files [1] : liste des documents lié à la procédure
+            * id [1] : identifiant du document
+            * name [1] : nom du document
+        
+        \
+        [1] Obligatoire
+
+
+      operationId: retourSignatureExterne
+      parameters: 
+        - in: header
+          name: x-ged-appli
+          description : "application à contacter"
+          schema:
+            type: string
+          example : "TEST"
+        - in: header
+          name: x-ged-courrier
+          description : "identifiant de la procédure"
+          schema:
+            type: string
+          example : "COURRIERS_84984"
+        - in: header
+          name: x-ged-doc
+          description : "identifiant de l'ancien document"
+          schema:
+            type: string
+          example : "WCDOCUMENTS_151849"
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/retourSignatureExterneRequest'
+      responses:
+        '201':
+          description: ok
+          content:
+            application/json:
+              schema : {}
+              example :
+                  codeRetour : "OK"
+                  codeStatus : 201
+                  nouveauDocumentId : 'WCDOCUMENTS_168448'
+                  procedureId : 'COURRIERS_84984'
+                  ancienDocumentId : 'WCDOCUMENTS_168447'
+                  signatureId : '/procedures/4e08b539-ba32-4c18-83ff-be8294cc00c7'
+                  
+  /signature/retourSignature/interne:
+    post:
+      security:
+        - basicAuth: []
+      tags:
+      - GED
+      summary: Retour de la signature interne
+      description: |
+        ### Paramètres :
+        **CP_SYSTEM** : [1] \
+        Nom d'application permet d’identifier à qui envoyer le message.\
+        **documentID** : \
+        Identifiant du document dans ELISE.\
+        **datesignature** : [1]\
+        Date de la signature (YYYYMMDDhhmmss).\
+        **emailsignataire** : [1]\
+        Email du signataire.\
+        **key** : [1]\
+        API Key.\
+        \
+        [1] Obligatoire
+
+
+      operationId: retourSignatureInterne
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/retourSignatureInterneRequest'
+      responses:
+        '201':
+          description: ok
+          content:
+            application/json:
+              schema : {}
+              example :
+                  codeRetour : "OK"
+                  codeStatus : 201
+                  signatureId : '/procedures/4e08b539-ba32-4c18-83ff-be8294cc00c7'
+                  statut : 'active'
+                  
+  /gestionMessage/relance/{id} :
+    post:
+      security:
+        - basicAuth: []
+      tags:
+      - GED
+      summary: Relance de messages InterSystems
+      operationId: relanceMessage
+      parameters:
+      - name: id
+        in: path
+        description: id du message à relancer
+        required : true
+        schema:
+          type: string
+          example: '299061'
+      responses:
+        '200' :
+          description: ok
+          content:
+            application/json:
+              schema : {}
+              example :
+                  codeRetour : "OK"
+                  codeStatus : 200
+
+
+
+components:
+  securitySchemes:
+    basicAuth:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: basic
+  schemas:
+    creationDocumentRequest:
+      type: object
+      properties:
+        metadonnees:
+          $ref: '#/components/schemas/metadonnees'
+        nomFichier:
+          type: string
+        nomCasier:
+          type: string
+        nomProcedure:
+          type: string
+        emailContact:
+          type: string
+        fichier:
+          type: string
+        async:
+          type : boolean
+        procedureID:
+          type : string
+      example:
+        nomFichier : 'document_swagger.pdf'
+        nomCasier : 'CASIER_GEDO_LSE'
+        nomProcedure : "procedurePREP"
+        emailContact : "emailContactPREP"
+        fichier : 'JVBERi0xLjcNCiW1tbW1DQoxIDAgb2JqDQo8PC9UeXBlL0NhdGFsb2cvUGFnZXMgMiAwIFIvTGFuZyhmci1GUikgL1N0cnVjdFRyZWVSb290IDEwIDAgUi9NYXJrSW5mbzw8L01hcmtlZCB0cnVlPj4vTWV0YWRhdGEgMjAgMCBSL1ZpZXdlclByZWZlcmVuY2VzIDIxIDAgUj4+DQplbmRvYmoNCjIgMCBvYmoNCjw8L1R5cGUvUGFnZXMvQ291bnQgMS9LaWRzWyAzIDAgUl0gPj4NCmVuZG9iag0KMyAwIG9iag0KPDwvVHlwZS9QYWdlL1BhcmVudCAyIDAgUi9SZXNvdXJjZXM8PC9Gb250PDwvRjEgNSAwIFI+Pi9FeHRHU3RhdGU8PC9HUzcgNyAwIFIvR1M4IDggMCBSPj4vUHJvY1NldFsvUERGL1RleHQvSW1hZ2VCL0ltYWdlQy9JbWFnZUldID4+L01lZGlhQm94WyAwIDAgNTk1LjMyIDg0MS45Ml0gL0NvbnRlbnRzIDQgMCBSL0dyb3VwPDwvVHlwZS9Hcm91cC9TL1RyYW5zcGFyZW5jeS9DUy9EZXZpY2VSR0I+Pi9UYWJzL1MvU3RydWN0UGFyZW50cyAwPj4NCmVuZG9iag0KNCAwIG9iag0KPDwvRmlsdGVyL0ZsYXRlRGVjb2RlL0xlbmd0aCAxODE+Pg0Kc3RyZWFtDQp4nK2OPQvCMBiE90D+w42JYPqmTZsI0qGfKBQqFhzEzdrFih+LP9+2dNDd2+447h54NdZrr0o3GSiOkWQpHpyRolHOWQ1CuApV4MMZrVY+ni1nhwVunCUNZ16hobUig+bC2dgmaFhSzjewEanIoemHXrm36F7DNLrJudmVnB1F/m5lJHq5NOIuA3FtcW6lJoFaGpGNcSFPaLac5cPnjrM/MGrjK/uNOJHNQPi9Q16l+AAx4DqvDQplbmRzdHJlYW0NCmVuZG9iag0KNSAwIG9iag0KPDwvVHlwZS9Gb250L1N1YnR5cGUvVHJ1ZVR5cGUvTmFtZS9GMS9CYXNlRm9udC9CQ0RFRUUrQ2FsaWJyaS9FbmNvZGluZy9XaW5BbnNpRW5jb2RpbmcvRm9udERlc2NyaXB0b3IgNiAwIFIvRmlyc3RDaGFyIDMyL0xhc3RDaGFyIDEyMC9XaWR0aHMgMTgg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MDIvMjItcmRmLXN5bnRheC1ucyMiPgo8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiAgeG1sbnM6cGRmPSJodHRwOi8vbnMuYWRvYmUuY29tL3BkZi8xLjMvIj4KPHBkZjpQcm9kdWNlcj5NaWNyb3NvZnTCriBXb3JkIHBvdXIgTWljcm9zb2Z0wqAzNjU8L3BkZjpQcm9kdWNlcj48L3JkZjpEZXNjcmlwdGlvbj4KPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyI+CjxkYzpjcmVhdG9yPjxyZGY6U2VxPjxyZGY6bGk+QW50aG9ueSBDT1VTVEVTPC9yZGY6bGk+PC9yZGY6U2VxPjwvZGM6Y3JlYXRvcj48L3JkZjpEZXNjcmlwdGlvbj4KPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyI+Cjx4bXA6Q3JlYXRvclRvb2w+TWljcm9zb2Z0wq4gV29yZCBwb3VyIE1pY3Jvc29mdMKgMzY1PC94bXA6Q3JlYXRvclRvb2w+PHhtcDpDcmVhdGVEYXRlPjIwMjEtMTAtMTVUMTU6NTU6MDgrMDI6MDA8L3htcDpDcmVhdGVEYXRlPjx4bXA6TW9kaWZ5RGF0ZT4yMDIxLTEwLTE1VDE1OjU1OjA4KzAyOjAwPC94bXA6TW9kaWZ5RGF0ZT48L3JkZjpEZXNjcmlwdGlvbj4KPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIj4KPHhtcE1NOkRvY3VtZW50SUQ+dXVpZDo2MDgyMTE3NC03QzFBLTQzMkItQkM1Ri0yQzU4NUIwQzM2NUU8L3htcE1NOkRvY3VtZW50SUQ+PHhtcE1NOkluc3RhbmNlSUQ+dXVpZDo2MDgyMTE3NC03QzFBLTQzMkItQkM1Ri0yQzU4NUIwQzM2NUU8L3htcE1NOkluc3RhbmNlSUQ+PC9yZGY6RGVzY3JpcHRpb24+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAo8L3JkZjpSREY+PC94OnhtcG1ldGE+PD94cGFja2V0IGVuZD0idyI/Pg0KZW5kc3RyZWFtDQplbmRvYmoNCjIxIDAgb2JqDQo8PC9EaXNwbGF5RG9jVGl0bGUgdHJ1ZT4+DQplbmRvYmoNCjIyIDAgb2JqDQo8PC9UeXBlL1hSZWYvU2l6ZSAyMi9XWyAxIDQgMl0gL1Jvb3QgMSAwIFIvSW5mbyA5IDAgUi9JRFs8NzQxMTgyNjAxQTdDMkI0M0JDNUYyQzU4NUIwQzM2NUU+PDc0MTE4MjYwMUE3QzJCNDNCQzVGMkM1ODVCMEMzNjVFPl0gL0ZpbHRlci9GbGF0ZURlY29kZS9MZW5ndGggODU+Pg0Kc3RyZWFtDQp4nC3LMRmAMBCD0VxbSlcUoA4BfDhg6wwasIAbDICHciTccG/JD/i1Zv4H4OMQF7GHhJvEjaRVnMIngXkQUSTRCRP/MnuXC/N+J2Uh00jmCrwpigt/DQplbmRzdHJlYW0NCmVuZG9iag0KeHJlZg0KMCAyMw0KMDAwMDAwMDAxMCA2NTUzNSBmDQowMDAwMDAwMDE3IDAwMDAwIG4NCjAwMDAwMDAxNjYgMDAwMDAgbg0KMDAwMDAwMDIyMiAwMDAwMCBuDQowMDAwMDAwNDkyIDAwMDAwIG4NCjAwMDAwMDA3NDcgMDAwMDAgbg0KMDAwMDAwMDkxNSAwMDAwMCBuDQowMDAwMDAxMTU0IDAwMDAwIG4NCjAwMDAwMDEyMDcgMDAwMDAgbg0KMDAwMDAwMTI2MCAwMDAwMCBuDQowMDAwMDAwMDExIDY1NTM1IGYNCjAwMDAwMDAwMTIgNjU1MzUgZg0KMDAwMDAwMDAxMyA2NTUzNSBmDQowMDAwMDAwMDE0IDY1NTM1IGYNCjAwMDAwMDAwMTUgNjU1MzUgZg0KMDAwMDAwMDAxNiA2NTUzNSBmDQowMDAwMDAwMDE3IDY1NTM1IGYNCjAwMDAwMDAwMDAgNjU1MzUgZg0KMDAwMDAwMTk0MCAwMDAwMCBuDQowMDAwMDAyMTYzIDAwMDAwIG4NCjAwMDAwMjU4ODcgMDAwMDAgbg0KMDAwMDAyOTA2NSAwMDAwMCBuDQowMDAwMDI5MTEwIDAwMDAwIG4NCnRyYWlsZXINCjw8L1NpemUgMjMvUm9vdCAxIDAgUi9JbmZvIDkgMCBSL0lEWzw3NDExODI2MDFBN0MyQjQzQkM1RjJDNTg1QjBDMzY1RT48NzQxMTgyNjAxQTdDMkI0M0JDNUYyQzU4NUIwQzM2NUU+XSA+Pg0Kc3RhcnR4cmVmDQoyOTM5NA0KJSVFT0YNCnhyZWYNCjAgMA0KdHJhaWxlcg0KPDwvU2l6ZSAyMy9Sb290IDEgMCBSL0luZm8gOSAwIFIvSURbPDc0MTE4MjYwMUE3QzJCNDNCQzVGMkM1ODVCMEMzNjVFPjw3NDExODI2MDFBN0MyQjQzQkM1RjJDNTg1QjBDMzY1RT5dIC9QcmV2IDI5Mzk0L1hSZWZTdG0gMjkxMTA+Pg0Kc3RhcnR4cmVmDQozMDAxMA0KJSVFT0Y='
+        async : false
+        metadonnees : {
+            "CP_SYSTEM": "TEST",
+            "CP_STATUS_METIER" : "A SIGNER",
+            "CP_NUM_USAGER" : "TIER01PREP"
+        }
+    
+    modificationDocumentRequest:
+      type: object
+      properties:
+        nomCasier:
+          type: string
+        metadonnees:
+          $ref: '#/components/schemas/metadonnees'
+      example:
+        nomCasier: "CASIER_GEDO_LSE"
+        metadonnees : {
+            "CP_TYPE_DOC": "Acte"
+        }
+    
+    rechercheDocumentRequest:
+      type: object
+      properties:
+        From:
+          type: string
+        MaxCount:
+          type: string
+        seulementFichePrincipale:
+          type: string
+        CP_NUM_USAGER:
+          type: string
+        procedureID:
+          type: string
+        documentID:
+          type: string
+        Sort:
+          type: string
+      example:
+        seulementFichePrincipale : false
+        CP_NUM_USAGER : "TIER01PREP"
+    
+    liaisonDocumentRequest:
+      type: object
+      properties:
+        documents:
+          type: array
+          items:
+            type : string
+      example:
+        documents : ["COURRIERS_83487"]
+    
+    creationFicheRequest:
+      type: object
+      properties:
+        metadonnees:
+          $ref: '#/components/schemas/metadonnees'
+        nomCasier:
+          type: string
+        nomProcedure:
+          type: string
+        emailContact:
+          type: string
+      example:
+        nomCasier : 'CASIER_GEDO_LSE'
+        nomProcedure : "procedurePREP"
+        emailContact : "emailContactPREP"
+        metadonnees : {
+            "CP_SYSTEM": "TEST",
+            "CP_STATUS_METIER" : "A SIGNER",
+            "CP_NUM_USAGER" : "TIER01PREP"
+        }
+    
+    signatureDocumentRequest:
+      type: object
+      properties:
+        procedureID:
+          type: string
+        documentID:
+          type: string
+        sujet:
+          type: string
+        message:
+          type: string
+        application:
+          type: string
+        signataires:
+          $ref: '#/components/schemas/signataires'
+        delai:
+          type: string
+        objetValidation:
+          $ref: '#/components/schemas/objetValidation'
+      example:
+        procedureID : 'COURRIERS_84984'
+        documentID : 'WCDOCUMENTS_151849'
+        sujet : '[TEST] signature'
+        message : "Bonjour <tag data-tag-type=\"string\" data-tag-name=\"recipient.firstname\"></tag> <tag data-tag-type=\"string\" data-tag-name=\"recipient.lastname\"></tag>,<br /></br>Vous êtes invité à signer des documents, cliquez sur le lien suivant pour le consulter : <tag data-tag-type=\"button\" data-tag-name=\"url\" data-tag-title=\"Accéder au document\"></tag>"
+        application : "TEST2"
+        signataires : [{
+         nom : "MACORI",
+         prenom : "Lucas",
+         email : "lucas.macori@cgi.com",
+         telephone : "+33617875691"
+        }]
+        delai : "1"
+        optionValidation : {
+        type : "email",
+        sujet : "code validation",
+        message : "Pour finaliser la signature électronique, utilisez le code de sécurité suivant : {{code}}"
+        }
+      
+    retourSignatureExterneRequest:
+      type: object
+      properties:
+        procedure:
+          type: object
+          properties:
+            id :
+              type : string
+            files :
+              type : array
+              items:
+                type : object
+                properties :
+                  id : 
+                    type : string
+                  name :
+                    type : string
+        member:
+          type: object
+          properties:
+            firstname:
+              type: string
+            lastname:
+              type: string
+            email:
+              type: string
+            comment:
+              type: string
+        eventName: 
+            type : string
+      example :
+        procedure : {
+          id : "27fa65b5-64ee-4447-a831-dace475f1dad",
+          files : [{
+            id : "/files/6c45d083-ac7f-4f8a-9ff0-07964dc28bd2",
+            name : "TEST.pdf"
+          }]
+        }
+        member :  {
+          firstname : "Corentin",
+          lastname : "Blondeau",
+          email : "corentin.blondeau@cgi.com",
+          comment : "pas bon montant",
+        }
+        eventName : "procedure.refused"
+        
+    
+    retourSignatureInterneRequest :
+      type: object
+      properties:
+        CP_SYSTEM:
+          type: string
+        documentID :
+          type : string
+        datesignature :
+          type : string
+        emailsignataire :
+          type : string
+        key :
+          type : string
+      example :
+        CP_SYSTEM : "TEST"
+        documentID : "WCDOCUMENTS_151851"
+        datesignature : "20221004155632"
+        emailsignataire : "martin.dupont@vnf.fr"
+        key : "AIzaSyC-IXH3K5WubPhH6rMOAanx5e8-dWJUz6c"
+    
+    metadonnees:
+      type: array
+      items:
+        type : object
+        properties:
+          key:
+            type: string
+          name:
+            type: string
+      example:
+        - key : "CP_SYSTEM"
+          name : "TEST"
+        - key : "CP_STATUS_METIER"
+          name : "A SIGNER"
+        - key : "CP_REF_METIER"
+          name : "TIE123ABC"
+    
+    signataires:
+      type: array
+      items:
+        type : object
+        properties:
+          nom:
+            type: string
+          prenom:
+            type: string
+          email:
+            type: string
+          telephone:
+            type: string
+      example :
+        - nom : "MACORI"
+          prenom : "Lucas"
+          email : "lucas.macori@cgi.com"
+          telephone : "+33617875691"
+    
+    objetValidation:
+      type: object
+      properties:
+        type:
+          type: string
+        sujet:
+          type: string
+        message:
+          type: string
+        telephone:
+          type: string
+      example :
+        type : "email"
+        sujet : "code validation"
+        message : "Pour finaliser la signature électronique, utilisez le code de sécurité suivant : {{code}}"
+      
+tags:
+- name: GED
+  description: ''
+security:
+  - basicAuth: []
+x-headmatter:
+  readable_by:
+    - admin
+    - GEDElise

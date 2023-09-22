@@ -1,0 +1,31 @@
+import links from './links';
+
+export default {
+  links: links,
+  colors: {
+    confidential: '#10c6b0',
+    reference: '#23b0b7',
+    smartData: '#1e4c8e',
+    lightGrey: '#efefef',
+    lightestGrey: '#fcfcfc',
+    white: '#fff',
+    grey: '#888',
+    greyBlue: '#c9d3df',
+    darkestGrey: '#373c42',
+    darkGrey: '#272c32',
+    service: '#af2341',
+    main: '#275166',
+    darkBlue: '#000081',
+    blue: '#000091',
+    vividBlue: '#0000b1',
+    lightBlue: '#e5e5f4',
+    lightestBlue: '#f8faff',
+    backgroundBlueGradient: 'linear-gradient(45deg, #003189, #005adf)',
+    red: '#dc3545',
+    green: '#17bd3d',
+    lightOrange: '#fff4d1',
+    darkOrange: '#3f3104',
+    orange: '#ffc107',
+  },
+  logo: 'dinum.png',
+};

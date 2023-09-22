@@ -1,0 +1,484 @@
+openapi: 3.0.0
+info:
+  title: talentsoft
+  contact: {}
+  version: '1.0'
+  description: |
+    *Proxy de l'API de TalentSoft*.
+
+    ---
+    
+    ### <font color=#28005F>L'API est composée des routes suivantes :</font>
+    ---------
+    1. Récupération des offres d'emploi  
+    2. Récupération des catégories professionnelles
+    3. Récupération des familles professionnelles
+    4. Récupération des types de contrat 
+    5. Récupération des régions
+    6. Récupération des détails d'une offre
+    7. Récupération des familles d'offre
+
+    ### <font color=#28005F>Securité</font>
+
+    Pour pouvoir effectuer des appels à l'API, il est nécessaire de s'authentifier en Basic authentification
+servers:
+- url: http://01sviam-prep1/talentsoft
+  variables: {}
+paths:
+  /v2/offerSummaries:
+    get:
+      security:
+        - basicAuth: []
+      tags:
+      - TalentSoft
+      summary: Récupération des offres d'emploi
+      description: Récupération des offres d'emploi
+      operationId: TalentSoft
+      parameters:
+      - name: count
+        in: query
+        description: 'Nombre d''offres par page'
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: '10'
+      - name: start
+        in: query
+        description: 'Numéro de page'
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: '1'
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content: {}
+      deprecated: false
+  /v2/referential/offerProfile:
+    get:
+      security:
+        - basicAuth: []
+      tags:
+      - TalentSoft
+      summary: Récupération des familles professionnelles
+      description: Récupération des familles professionnelles
+      operationId: TalentSoft
+      parameters:
+      - name: filter
+        in: query
+        description: 'Filtre de famille (active, inactive et all'
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: 'all'
+      - name: parentCode
+        in: query
+        description: ''
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: ''
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content: {}
+      deprecated: false
+  /v2/referential/professionalCategory:
+    get:
+      security:
+        - basicAuth: []
+      tags:
+      - TalentSoft
+      summary: Récupération des catégories professionnelles
+      description: Récupération des catégories professionnelles
+      operationId: TalentSoft
+      parameters:
+      - name: filter
+        in: query
+        description: 'Filtre de catégorie (active, inactive et all'
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: 'all'
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content: {}
+      deprecated: false
+  /v2/referential/contractType:
+    get:
+      security:
+        - basicAuth: []
+      tags:
+      - TalentSoft
+      summary: Récupération des types de contrat
+      description: Récupération des types de contrat
+      operationId: TalentSoft
+      parameters:
+      - name: filter
+        in: query
+        description: 'Filtre de contrat (active, inactive et all'
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: 'all'
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content: {}
+      deprecated: false
+  /v2/referential/customcodetable__TS_52d218af-6829-4efd-b2f2-d612d94d0806?:
+    get:
+      security:
+        - basicAuth: []
+      tags:
+      - TalentSoft
+      summary: Récupération des régions
+      description: Récupération des régions
+      operationId: TalentSoft
+      parameters:
+      - name: filter
+        in: query
+        description: 'Filtre de région (active, inactive et all'
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: 'all'
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content: {}
+      deprecated: false
+  /v2/offers/getOffer:
+    get:
+      security:
+        - basicAuth: []
+      tags:
+      - TalentSoft
+      summary: Récupération des détails d'une offre
+      description: Récupération des détails d'une offre
+      operationId: TalentSoft
+      parameters:
+      - name: reference
+        in: query
+        description: 'Référence de l''offre d''emploi'
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: '2022-323'
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content: {}
+      deprecated: false
+  /v2/referential/offerFamily:
+    get:
+      security:
+        - basicAuth: []
+      tags:
+      - TalentSoft
+      summary: Récupération des familles d'offre
+      description: Récupération des familles d'offre
+      operationId: TalentSoft
+      parameters:
+      - name: filter
+        in: query
+        description: 'Filtre de famille d''emploi'
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: 'all'
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content: {}
+      deprecated: false
+components:
+  schemas:
+    OffreEmploi:
+      title: Offre d'emploi
+      type: object
+      properties:
+        reference:
+          type: string
+        isTopOffer:
+          type: boolean
+        title:
+          type: string
+        location:
+            type: string
+        modificationDate:
+            type: date
+        contractType:
+            type: Type de contrat
+        offerFamilyCategory:
+          type: Famille d'offre
+        organisationName:
+            type: string
+        organisationDescription:
+            type: string
+        organisationLogoUrl:
+            type: string
+        contractDuration:
+            type: integer
+        contractTypeCountry:
+            type: Région
+        description1:
+            type: string
+        description2:
+            type: string
+        description2Formatted:
+            type: string
+        salaryRange:
+            type: salaire
+        latitude:
+            type: float
+        longitude:
+            type: float
+        professionalCategory:
+            type: Catégorie professionnelle
+        _links:
+            type: List<Lien>
+        offerUrl:
+            type: string
+        urlRedirectionEmployee:
+            type: string
+        urlRedirectionApplicant:
+            type: string
+        startPublicationDate:
+            type: date
+        beginningDate:
+            type: date
+      example:
+        code: 2026
+        clientCode: "B187AC3C-EA43-4EE9-9482-FD18F5C09E26"
+        label: "Accueil"
+        active: true
+        parentCode: 2012
+        type: "offerProfile"
+        parentType: "offerFamily"
+        hasChildren: false
+    FamillesPro:
+      title: Famille professionnelle
+      type: object
+      properties:
+        code:
+          type: integer
+        clientCode:
+          type: string
+        label:
+          type: string
+        active:
+          type: boolean
+        parentCode:
+            type: integer
+        type:
+          type: string
+        parentType:
+          type: string
+        hasChildren:
+          type: boolean
+      example:
+        code: 2026
+        clientCode: "B187AC3C-EA43-4EE9-9482-FD18F5C09E26"
+        label: "Accueil"
+        active: true
+        parentCode: 2012
+        type: "offerProfile"
+        parentType: "offerFamily"
+        hasChildren: false
+    CategoriePro:
+      title: Catégorie professionnelle
+      type: object
+      properties:
+        code:
+          type: integer
+        clientCode:
+          type: string
+        label:
+          type: string
+        active:
+          type: boolean
+        parentCode:
+            type: integer
+        type:
+          type: string
+        parentType:
+          type: string
+        hasChildren:
+          type: boolean
+      example:
+        code: 967
+        clientCode: "_TS_CO_ProfessionalCategory_Professionintermdiaire"
+        label: "Agent de maitrise"
+        active: true
+        parentCode: 79
+        type: "professionalCategory"
+        parentType: ""
+        hasChildren: false
+    TypeContrat:
+      title: Type de contrat
+      type: object
+      properties:
+        code:
+          type: integer
+        clientCode:
+          type: string
+        label:
+          type: string
+        active:
+          type: boolean
+        parentCode:
+            type: integer
+        type:
+          type: string
+        parentType:
+          type: string
+        hasChildren:
+          type: boolean
+      example:
+        code: 2448
+        clientCode: "CDD"
+        label: "CDD"
+        active: true
+        parentCode: 79
+        type: "contractType"
+        parentType: ""
+        hasChildren: false
+    Region:
+      title: Région
+      type: object
+      properties:
+        code:
+          type: integer
+        clientCode:
+          type: string
+        label:
+          type: string
+        active:
+          type: boolean
+        parentCode:
+            type: integer
+        type:
+          type: string
+        parentType:
+          type: string
+        hasChildren:
+          type: boolean
+      example:
+        code: 3000
+        clientCode: "_TS_c33b0f7d-ba26-4058-aed9-e36f6decdbf4"
+        label: "SIEGE"
+        active: true
+        parentCode: 79
+        type: "customCodeTableType"
+        parentType: ""
+        hasChildren: false
+    FamilleOffre:
+      title: Famille d'offre
+      type: object
+      properties:
+        code:
+          type: integer
+        clientCode:
+          type: string
+        label:
+          type: string
+        active:
+          type: boolean
+        parentCode:
+            type: integer
+        type:
+          type: string
+        parentType:
+          type: string
+        hasChildren:
+          type: boolean
+        _links: list<Lien>
+      example:
+        code: 1798
+        clientCode: "F378B2AB-3D7B-4E4A-B54C-5F8538CD4218"
+        label: "01 - General management"
+        active: false
+        parentCode: 341
+        type: "offerFamily"
+        parentType: "offerFamilyCategory"
+        hasChildren: false
+    Lien:
+      title: Lien
+      type: object
+      properties:
+        href:
+          type: string
+        rel:
+          type: string
+      example:
+        href: https://testvnf-cand.talent-soft.com/api/v2/referential/offerProfile?filter=all&parentCode=1798
+        rel: "children"
+    Salaire:
+      title: Salaire
+      type: object
+      properties:
+        code:
+          type: integer
+        clientCode:
+          type: string
+        label:
+          type: string
+        active:
+          type: boolean
+        parentCode:
+          type: integer
+        type:
+          type: string
+        parentType:
+          type: string
+        hasChildren:
+          type: boolean
+      example:
+        code: 2368
+        clientCode: "_TS_d07db2bb-6f3a-4134-8555-33878faf9f5c"
+        label: "20 K€ - 25K€"
+        active: true
+        parentCode: null
+        type: "salarayRange"
+        parentType: ""
+        hasChildren: false
+  securitySchemes:
+    basicAuth:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: basic
+tags:
+- name: TalentSoft
+  description: ''
+security:
+  - basicAuth: []
+x-headmatter:
+  readable_by:
+    - admin
+    - TalentSoft

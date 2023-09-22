@@ -1,0 +1,366 @@
+openapi: 3.0.0
+info:
+  title: Calcul Itineraire
+  contact: {}
+  version: '1.0'
+  description: |
+    *Cette API permet d'utiliser les services de calcul d'itineraires de l'API EURIS.
+
+    ---
+    
+    ### <font color=#28005F>L'API est composée de 2 routes :</font>
+    ---------
+    1. Appel de la route /calculateRoute de l'API EURIS
+    2. Appel de la route /calculate de l'API EURIS 
+
+    ### <font color=#28005F>Securité</font>
+
+    Pour pouvoir effectuer des appels à l'API, il est nécessaire de s'authentifier sour le protocole Basic authentification
+servers:
+- url: http://01SVIAM-PREP1/EURIS
+  variables: {}
+paths:
+  /Calculate:
+    post:
+      tags:
+      - Misc
+      summary: Calculate
+      operationId: Calculate
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/CalculateRequest'
+              - example:
+                  StartISRS: FRSUNVN285LOKB100171
+                  EndISRS: FRXXXVN3440000001496
+                  ShipCategory: 0
+                  ShipDimensions:
+                    Height: 0
+                    Width: 0
+                    Draught: 0
+                    Length: 0
+                    CEMT: string
+                  ShipSpeed: 0
+                  DepartAt: 2022-09-14T07:01:35.235Z
+                  ArriveBy: ''
+                  CalculationOptions:
+                    ComputationType: string
+                    UseSailingSpeeds: true
+                    UsePassageDuration: true
+                    UseReducedDimensions: true
+                  ResultFormatting:
+                    ReturnItinerary: true
+                    ReturnGeometry: true
+                    SplitGeometry: true
+                    HideViaPoints: true
+                    ResultLanguage: string
+            example:
+              StartISRS: FRSUNVN285LOKB100171
+              EndISRS: FRXXXVN3440000001496
+              ShipCategory: 0
+              ShipDimensions:
+                Height: 0
+                Width: 0
+                Draught: 0
+                Length: 0
+                CEMT: string
+              ShipSpeed: 0
+              DepartAt: 2022-09-14T07:01:35.235Z
+              ArriveBy: ''
+              CalculationOptions:
+                ComputationType: string
+                UseSailingSpeeds: true
+                UsePassageDuration: true
+                UseReducedDimensions: true
+              ResultFormatting:
+                ReturnItinerary: true
+                ReturnGeometry: true
+                SplitGeometry: true
+                HideViaPoints: true
+                ResultLanguage: string
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+      - basic: []
+  /CalculateRoute:
+    post:
+      tags:
+      - Misc
+      summary: CalculateRoute
+      operationId: CalculateRoute
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/CalculateRouteRequest'
+              - example:
+                  StartISRS: FRSUNVN285LOKB100171
+                  EndISRS: FRXXXVN3440000001496
+                  ShipCategory: 0
+                  ShipDimensions:
+                    Height: 0
+                    Width: 0
+                    Draught: 0
+                    Length: 0
+                    CEMT: string
+                  ShipSpeed: 0
+                  DepartAt: 2022-09-14T07:01:35.235Z
+                  ArriveBy: ''
+                  CalculationOptions:
+                    ComputationType: string
+                    UseSailingSpeeds: true
+                    UsePassageDuration: true
+                    UseReducedDimensions: true
+                  ResultFormatting:
+                    ReturnItinerary: true
+                    ReturnGeometry: true
+                    SplitGeometry: true
+                    HideViaPoints: true
+                    ResultLanguage: string
+            example:
+              StartISRS: FRSUNVN285LOKB100171
+              EndISRS: FRXXXVN3440000001496
+              ShipCategory: 0
+              ShipDimensions:
+                Height: 0
+                Width: 0
+                Draught: 0
+                Length: 0
+                CEMT: string
+              ShipSpeed: 0
+              DepartAt: 2022-09-14T07:01:35.235Z
+              ArriveBy: ''
+              CalculationOptions:
+                ComputationType: string
+                UseSailingSpeeds: true
+                UsePassageDuration: true
+                UseReducedDimensions: true
+              ResultFormatting:
+                ReturnItinerary: true
+                ReturnGeometry: true
+                SplitGeometry: true
+                HideViaPoints: true
+                ResultLanguage: string
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      security:
+      - basic: []
+components:
+  schemas:
+    CalculateRequest:
+      title: CalculateRequest
+      required:
+      - StartISRS
+      - EndISRS
+      - ShipCategory
+      - ShipDimensions
+      - ShipSpeed
+      - DepartAt
+      - ArriveBy
+      - CalculationOptions
+      - ResultFormatting
+      type: object
+      properties:
+        StartISRS:
+          type: string
+        EndISRS:
+          type: string
+        ShipCategory:
+          type: integer
+          format: int32
+        ShipDimensions:
+          $ref: '#/components/schemas/ShipDimensions'
+        ShipSpeed:
+          type: integer
+          format: int32
+        DepartAt:
+          type: string
+        ArriveBy:
+          type: string
+        CalculationOptions:
+          $ref: '#/components/schemas/CalculationOptions'
+        ResultFormatting:
+          $ref: '#/components/schemas/ResultFormatting'
+      example:
+        StartISRS: FRSUNVN285LOKB100171
+        EndISRS: FRXXXVN3440000001496
+        ShipCategory: 0
+        ShipDimensions:
+          Height: 0
+          Width: 0
+          Draught: 0
+          Length: 0
+          CEMT: string
+        ShipSpeed: 0
+        DepartAt: 2022-09-14T07:01:35.235Z
+        ArriveBy: ''
+        CalculationOptions:
+          ComputationType: string
+          UseSailingSpeeds: true
+          UsePassageDuration: true
+          UseReducedDimensions: true
+        ResultFormatting:
+          ReturnItinerary: true
+          ReturnGeometry: true
+          SplitGeometry: true
+          HideViaPoints: true
+          ResultLanguage: string
+    ShipDimensions:
+      title: ShipDimensions
+      required:
+      - Height
+      - Width
+      - Draught
+      - Length
+      - CEMT
+      type: object
+      properties:
+        Height:
+          type: integer
+          format: int32
+        Width:
+          type: integer
+          format: int32
+        Draught:
+          type: integer
+          format: int32
+        Length:
+          type: integer
+          format: int32
+        CEMT:
+          type: string
+      example:
+        Height: 0
+        Width: 0
+        Draught: 0
+        Length: 0
+        CEMT: string
+    CalculationOptions:
+      title: CalculationOptions
+      required:
+      - ComputationType
+      - UseSailingSpeeds
+      - UsePassageDuration
+      - UseReducedDimensions
+      type: object
+      properties:
+        ComputationType:
+          type: string
+        UseSailingSpeeds:
+          type: boolean
+        UsePassageDuration:
+          type: boolean
+        UseReducedDimensions:
+          type: boolean
+      example:
+        ComputationType: string
+        UseSailingSpeeds: true
+        UsePassageDuration: true
+        UseReducedDimensions: true
+    ResultFormatting:
+      title: ResultFormatting
+      required:
+      - ReturnItinerary
+      - ReturnGeometry
+      - SplitGeometry
+      - HideViaPoints
+      - ResultLanguage
+      type: object
+      properties:
+        ReturnItinerary:
+          type: boolean
+        ReturnGeometry:
+          type: boolean
+        SplitGeometry:
+          type: boolean
+        HideViaPoints:
+          type: boolean
+        ResultLanguage:
+          type: string
+      example:
+        ReturnItinerary: true
+        ReturnGeometry: true
+        SplitGeometry: true
+        HideViaPoints: true
+        ResultLanguage: string
+    CalculateRouteRequest:
+      title: CalculateRouteRequest
+      required:
+      - StartISRS
+      - EndISRS
+      - ShipCategory
+      - ShipDimensions
+      - ShipSpeed
+      - DepartAt
+      - ArriveBy
+      - CalculationOptions
+      - ResultFormatting
+      type: object
+      properties:
+        StartISRS:
+          type: string
+        EndISRS:
+          type: string
+        ShipCategory:
+          type: integer
+          format: int32
+        ShipDimensions:
+          $ref: '#/components/schemas/ShipDimensions'
+        ShipSpeed:
+          type: integer
+          format: int32
+        DepartAt:
+          type: string
+        ArriveBy:
+          type: string
+        CalculationOptions:
+          $ref: '#/components/schemas/CalculationOptions'
+        ResultFormatting:
+          $ref: '#/components/schemas/ResultFormatting'
+      example:
+        StartISRS: FRSUNVN285LOKB100171
+        EndISRS: FRXXXVN3440000001496
+        ShipCategory: 0
+        ShipDimensions:
+          Height: 0
+          Width: 0
+          Draught: 0
+          Length: 0
+          CEMT: string
+        ShipSpeed: 0
+        DepartAt: 2022-09-14T07:01:35.235Z
+        ArriveBy: ''
+        CalculationOptions:
+          ComputationType: string
+          UseSailingSpeeds: true
+          UsePassageDuration: true
+          UseReducedDimensions: true
+        ResultFormatting:
+          ReturnItinerary: true
+          ReturnGeometry: true
+          SplitGeometry: true
+          HideViaPoints: true
+          ResultLanguage: string
+  securitySchemes:
+    basic:
+      type: http
+      scheme: basic
+security: []
+tags:
+- name: Misc
+  description: ''

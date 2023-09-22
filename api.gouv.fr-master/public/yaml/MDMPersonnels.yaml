@@ -1,0 +1,805 @@
+openapi: 3.0.0
+info:
+  title: API Personnel
+  contact: {}
+  version: '1.2'
+  description: |
+    *Cette API permet la médiation des données du référentiel personnels*.
+
+    ---
+    
+    ### <font color=#28005F>L'API est composée d'une route comportant 3 query parameters différents, correspondant à trois filtrage différents :</font>
+    ---------
+    1. <b>?rowID={id}</b>: Récupération des informations de personnel par ID MDM
+    2. <b>?emailPro={email}</b>: Récupération des informations de personnel par email professionnel
+    3. <b>?matriculePaie={matricule}</b>: Récupération des informations de personnel par matricule de paie
+    
+    <i>seul l'un des 3 est requis</i>
+
+    ### <font color=#28005F>Securité</font>
+
+    Pour pouvoir effectuer des appels à l'API, il est nécessaire de s'authentifier sour le protocole penId connect
+servers:
+- url: http://01SVIAM-PREP1
+  variables: {}
+paths:
+  /mdmrh/personnels:
+    get:
+      tags:
+      - Personnels
+      summary: recherche par id MDM
+      operationId: RechercheIdMDM
+      parameters: 
+      - in : query
+        name : rowID
+        schema : 
+          type : integer
+        description : champ correspondant à l'identifiant MDM de la fiche Personnel
+      - in : query
+        name : emailPro
+        schema : 
+          type : string
+        description : email professionnel du personnel
+      - in : query
+        name : matriculePaie
+        schema : 
+          type : string
+        description : matricule de paie du personnel
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+           application/json:
+              schema:
+                $ref: '#/components/schemas/personnel'
+      deprecated: false
+      security:
+      - ApiKeyAuth: []
+      
+components:
+  securitySchemes:
+    ApiKeyAuth:        # arbitrary name for the security scheme
+      type: apiKey
+      in: header       # can be "header", "query" or "cookie"
+      name: X-API-Key  # name of the header, query parameter or cookie
+  schemas:
+    personnel:
+      type: object
+      properties:
+        rowidObject:
+          type: string
+          description: Identifiant MDM RH Personnel (identifiant généré par le MDM RH)
+        label:
+          type: string
+        PRS_LIB_INFO_COMPLEMENTAIRE:
+          type: string
+          description: Description Informations complémentaires Personnel
+        PRS_COD_ENTITY_TYPE:
+          type: string
+          description: Code Classe - Entity Type
+        PRS_COD_MATRICULE:
+          type: string
+          description: Code Matricule du Personnel
+        PRS_COD_RENOIRH:
+          type: string
+          description: Identifiant RenoiRH
+        PRS_CODE_INSEE_SS:
+          type: string
+          description: Numéro de Sécurité Sociale 15 (Radical+clé)  -  Numéro d'Inscription au Répertoire – NIR
+        PRS_CODE_INSEE_SS_RADICAL:
+          type: string
+          description: Numéro de Sécurité Sociale 13 (Radical)  -  Numéro d'Inscription au Répertoire – NIR
+        PRS_DATE_NAISSANCE:
+          type: string
+          description: Date de naissance du Personnel
+        PRS_LIB_NOM_PRENOM:
+          type: string
+          description: Nom et Prénom du Personnel
+        PRS_LIB_NOM:
+          type: string
+          description: Nom du Personnel
+        PRS_LIB_PRENOM:
+          type: string
+          description: Prénom du Personnel
+        PRS_COD_NATIONALITE:
+          type: string
+          description: Code Nationalité du Personnel
+        PRS_LIB_NATIONALITE:
+          type: string
+          description: Description Nationalité du Personnel
+        PRS_COD_GENRE:
+          type: string
+          description: Code Genre du Personnel
+        PRS_LIB_GENRE:
+          type: string
+          description: Description Genre du Personnel
+        PRS_COD_STATUT_FAMILIALE:
+          type: string
+          description: Code Situation Familiale du Personnel
+        PRS_LIB_STATUT_FAMILIALE:
+          type: string
+          description: Description Situation Familiale du Personnel
+        PRS_DATE_ENTREE_VNF:
+          type: string
+          description: Date d'Entrée VNF
+        PRS_COD_MOTIF_ENTREE:
+          type: string
+          description: Code Motif d'Entrée VNF
+        PRS_LIB_MOTIF_ENTREE:
+          type: string
+          description: Description Motif d'Entrée VNF
+        PRS_DATE_SORTIE_VNF:
+          type: string
+          description: Date de Sortie VNF
+        PRS_COD_MOTIF_SORTIE:
+          type: string
+          description: Code Motif de Sortie VNF
+        PRS_LIB_MOTIF_SORTIE:
+          type: string
+          description: Description Motif de Sortie VNF
+        PRS_FLAG_BOETH:
+          type: string
+          description: Indicateur BOETH - Bénéficiaire de l'obligation d'emploi des travailleurs handicapés
+        PRS_COD_MOTIF_BOETH:
+          type: string
+          description: Code Motif BOETH - Bénéficiaire de l'obligation d'emploi des travailleurs handicapés
+        PRS_LIB_MOTIF_BOETH:
+          type: string
+          description: Description Motif BOETH - Bénéficiaire de l'obligation d'emploi des travailleurs handicapés
+        PRS_DATE_DEBUT_BOETH:
+          type: string
+          description: Date Début BOETH - Bénéficiaire de l'obligation d'emploi des travailleurs handicapés
+        PRS_DATE_FIN_BOETH:
+          type: string
+          description: Date Fin BOETH - Bénéficiaire de l'obligation d'emploi des travailleurs handicapés
+        perNationalite_rowidObject:
+          type: string
+        perSexe_rowidObject:
+          type: string
+        affMentree_rowidObject:
+          type: string
+        CONTACT:
+          type: object
+          properties:
+            link:
+              type: array
+              items: {}
+            firstRecord:
+              type: integer
+            pageSize:
+              type: integer
+            searchToken:
+              type: string
+            item:
+              type: array
+              items:
+                type: object
+                properties:
+                  rowidObject:
+                    type: string
+                  label:
+                    type: string
+                  CNT_ID_CONNEXION:
+                    type: string
+                    description: Identifiant de connexion contact Personnel
+                  CNT_LIB_NOM_COMLET:
+                    type: string
+                    description: Nom complet du contact Personnel
+                  CNT_LIB_NUM_TEL_MOB_PRO:
+                    type: string
+                    description: Téléphone mobile professionnel du contact Personnel
+                  CNT_LIB_NUM_TEL_DOM:
+                    type: string
+                    description: Téléphone personnel du contact Personnel
+                  CNT_LIB_NUM_TEL_FIX_PRO:
+                    type: string
+                    description: Téléphone fixe professionnel
+                  CNT_LIB_ADRESSE_LIGNE1:
+                    type: string
+                    description: Adresse Ligne 1 du contact Personnel
+                  CNT_LIB_ADRESSE_LIGNE2:
+                    type: string
+                    description: Adresse Ligne 2 du contact Personnel
+                  CNT_LIB_ADRESSE_CPOSTAL:
+                    type: string
+                    description: Code Postal du contact Personnel
+                  CNT_LIB_ADRESSE_VILLE:
+                    type: string
+                    description: Ville
+                  CNT_LIB_EMAIL_PRO:
+                    type: string
+                    description: Adresse mail professionnelle
+                  CNT_LIB_EMAIL_DOM:
+                    type: string
+                    description: Adresse mail personnelle
+              description: Liste de Coordonnées Contact Personnel
+        TYPE:
+          type: object
+          properties:
+            link:
+              type: array
+              items: {}
+            firstRecord:
+              type: integer
+            pageSize:
+              type: integer
+            searchToken:
+              type: string
+            item:
+              type: array
+              items:
+                type: object
+                properties:
+                  rowidObject:
+                    type: string
+                  label:
+                    type: string
+                  TYP_COD_TYPE_PERSONNEL:
+                    type: string
+                    description: Code Type de personnel
+                  TYP_LIB_TYPE_PERSONNEL:
+                    type: string
+                    description: Description Type de personnel
+                  affTypePers_rowidObject:
+                    type: string
+              description: Liste des Types Personnel
+        POSITION_ADM:
+          type: object
+          properties:
+            link:
+              type: array
+              items: {}
+            firstRecord:
+              type: integer
+            pageSize:
+              type: integer
+            searchToken:
+              type: string
+            item:
+              type: array
+              items:
+                type: object
+                properties:
+                  rowidObject:
+                    type: string
+                  label:
+                    type: string
+                  POS_COD_POSITION_ADMIN:
+                    type: string
+                    description: Code Position Administrative
+                  POS_LIB_POSITION_ADMIN:
+                    type: string
+                    description: Description Position Administrative
+                  pubPosAdm_rowidObject:
+                    type: string
+              description: Liste des Positions Administratives du Personnel
+        CORPS:
+          type: object
+          properties:
+            link:
+              type: array
+              items: {}
+            firstRecord:
+              type: integer
+            pageSize:
+              type: integer
+            searchToken:
+              type: string
+            item:
+              type: array
+              items:
+                type: object
+                properties:
+                  rowidObject:
+                    type: string
+                  label:
+                    type: string
+                  CRP_COD_CORPS:
+                    type: string
+                    description: Code Corps
+                  CRP_LIB_CORPS:
+                    type: string
+                    description: Description Corps
+                  corps_rowidObject:
+                    type: string
+              description: Liste des Corps du Personnel
+        FILIERE:
+          type: object
+          properties:
+            link:
+              type: array
+              items: {}
+            firstRecord:
+              type: integer
+            pageSize:
+              type: integer
+            searchToken:
+              type: string
+            item:
+              type: array
+              items:
+                type: object
+                properties:
+                  rowidObject:
+                    type: string
+                  label:
+                    type: string
+                  FLR_COD_FILIERE:
+                    type: string
+                    description: Code Filière
+                  FLR_LIB_FILIERE:
+                    type: string
+                    description: Description Filière
+                  pubFiliere_rowidObject:
+                    type: string
+              description: Liste des Filières du Personnel
+        CARRIERE:
+          type: object
+          properties:
+            link:
+              type: array
+              items: {}
+            firstRecord:
+              type: integer
+            pageSize:
+              type: integer
+            searchToken:
+              type: string
+            item:
+              type: array
+              items:
+                type: object
+                properties:
+                  rowidObject:
+                    type: string
+                  label:
+                    type: string
+                  CAR_DATE_ENTREE_MINISTEE:
+                    type: string
+                    description: Date d'entrée ministère
+                  CAR_DATE_ANCIENNETE_FPUBLIQUE:
+                    type: string
+                    description: Date d'ancienneté Fonction Publique
+                  CAR_COD_STATUT_CARRIERE:
+                    type: string
+                    description: Code Statut Carriere
+                  CAR_LIB_STATUT_CARRIERE:
+                    type: string
+                    description: Description Statut Carriere
+                  pubStatut_rowidObject:
+                    type: string
+              description: Liste des Carierres Personnel
+        GRADE:
+          type: object
+          properties:
+            link:
+              type: array
+              items: {}
+            firstRecord:
+              type: integer
+            pageSize:
+              type: integer
+            searchToken:
+              type: string
+            item:
+              type: array
+              items:
+                type: object
+                properties:
+                  rowidObject:
+                    type: string
+                  label:
+                    type: string
+                  GRD_COD_MACRO_GRADE:
+                    type: string
+                    description: Code Macro Grade
+                  GRD_LIB_MACRO_GRADE:
+                    type: string
+                    description: Description Macro Grade
+                  GRD_COD_GRADE:
+                    type: string
+                    description: Code Grade
+                  GRD_LIB_GRADE:
+                    type: string
+                    description: Description Grade
+                  pubMacrograde_rowidObject:
+                    type: string
+                  pubGrade_rowidObject:
+                    type: string
+              description: Liste des Grades du Personnel
+        ECHELON:
+          type: object
+          properties:
+            link:
+              type: array
+              items: {}
+            firstRecord:
+              type: integer
+            pageSize:
+              type: integer
+            searchToken:
+              type: string
+            item:
+              type: array
+              items:
+                type: object
+                properties:
+                  rowidObject:
+                    type: string
+                  label:
+                    type: string
+                  ECH_COD_ECHELONS:
+                    type: string
+                    description: Code Echelon
+              description: Liste des Echelons du Personnel
+        AFFECTATION:
+          type: object
+          properties:
+            link:
+              type: array
+              items: {}
+            firstRecord:
+              type: integer
+            pageSize:
+              type: integer
+            searchToken:
+              type: string
+            item:
+              type: array
+              items:
+                type: object
+                properties:
+                  rowidObject:
+                    type: string
+                  label:
+                    type: string
+                  AFF_LIB_AFFECTATION_PRINC:
+                    type: string
+                    description: Affectation principale
+                  AFF_LIB_AFFECTATION_DETAIL:
+                    type: string
+                    description: Détail d'affectation
+                  AFF_FLAG_ELU_PERSONNEL:
+                    type: string
+                    description: Indicateur Elu du personnel
+                  AFF_FLAG_PERMANENT_SYNDICAL:
+                    type: string
+                    description: Indicateur Permanent syndical
+                  eluPers_rowidObject:
+                    type: string
+                  permSynd_rowidObject:
+                    type: string
+              description: Liste des Affectations Personnel
+        QUOTITE:
+          type: object
+          properties:
+            link:
+              type: array
+              items: {}
+            firstRecord:
+              type: integer
+            pageSize:
+              type: integer
+            searchToken:
+              type: string
+            item:
+              type: array
+              items:
+                type: object
+                properties:
+                  rowidObject:
+                    type: string
+                  label:
+                    type: string
+                  QUO_QTE_QUOTITE_PAYEE:
+                    type: string
+                    description: Quotité Payée
+                  QUO_QTE_QUOTITE_TRAVAIL:
+                    type: string
+                    description: Quotité de Travail
+              description: Liste des Quotités du Personnel
+        CONTRAT_FP:
+          type: object
+          properties:
+            link:
+              type: array
+              items: {}
+            firstRecord:
+              type: integer
+            pageSize:
+              type: integer
+            searchToken:
+              type: string
+            item:
+              type: array
+              items:
+                type: object
+                properties:
+                  rowidObject:
+                    type: string
+                  label:
+                    type: string
+                  CTT_DATE_DEBUT_CONTRAT_FP:
+                    type: string
+                    description: Date Début Contrat Fonction Publique
+                  CTT_DATE_FIN_CONTRAT_FP:
+                    type: string
+                    description: Date Fin Contrat Fonction Publique
+              description: Liste des Contrats Fonction Publique
+        POSTE:
+          type: object
+          properties:
+            link:
+              type: array
+              items: {}
+            firstRecord:
+              type: integer
+            pageSize:
+              type: integer
+            searchToken:
+              type: string
+            item:
+              type: array
+              items:
+                type: object
+                properties:
+                  rowidObject:
+                    type: string
+                  label:
+                    type: string
+                  PST_COD_TYPE_RELATION:
+                    type: string
+                    description: Type de Relation
+                  PST_COD_HIERARCHIQUE:
+                    type: string
+                    description: Hierarchy Code
+                  PST_COD_MOTIF_VACANCE_POSTE:
+                    type: string
+                    description: Motif de vacance potentielle
+                  PST_DATE_PUBLICATION_WEB:
+                    type: string
+                    description: Date de publication du poste sur Intranet
+                  PST_DAT_VACANCE_POSTE:
+                    type: string
+                    description: Date de vacance potentielle
+                  PST_DATE_OUVERTURE_POSTE:
+                    type: string
+                    description: Date d'ouverture du poste
+                  PST_DATE_FERMETURE_POSTE:
+                    type: string
+                    description: Date de fermeture du poste
+                  PST_COD_SERVICE_REHUCIT:
+                    type: string
+                    description: Code service ReHucit
+                  PST_COD_NIVEAU_ATTENDU:
+                    type: string
+                    description: Niveau attendu
+                  PST_COD_NBI:
+                    type: string
+                    description: NBI
+                  PST_COD_ENTITY_TYPE:
+                    type: string
+                    description: Code Classe - Entity Type
+                  PST_LIB_BATIMENT_TRAVAIL:
+                    type: string
+                    description: Bâtiment de travail
+                  PST_LIB_IDENTIFIANT_POSTE:
+                    type: string
+                    description: Identifiant du poste
+                  PST_LIB_COMPLET_POSTE:
+                    type: string
+                    description: Libellé complet du poste
+                  PST_LIB_RESIDENCE_ADMIN:
+                    type: string
+                    description: Lieu de travail (résidence administrative)
+                  PST_LIB_COMPLEMENTAIRE_AUTRE_POSTE:
+                    type: string
+                    description: Autres commentaires sur le poste
+                  PST_LIB_GENERIQUE_POSTE:
+                    type: string
+                    description: Libellé générique du poste
+                  PST_COD_RENOIRH:
+                    type: string
+                    description: Identifiant RenoiRH
+                  PST_COD_BATIMENT_TRAVAIL:
+                    type: string
+                    description: Code bâtiment de travail
+                  PST_COD_RESIDENCE_ADMIN_INSEE:
+                    type: string
+                    description: Code lieu de travail (INSEE)
+                  PST_LIB_COMMENTAIRE_LOCALISATION:
+                    type: string
+                    description: Commentaires liés à la localisation
+                  PST_QTE_QUOTATION_REGIME_INDEM:
+                    type: string
+                    description: Cotation régime indemnitaire
+                  PST_COD_EMPLOI_REPERE:
+                    type: string
+                    description: Code Emploi repère VNF
+                  PST_LIB_EMPLOI_REPERE:
+                    type: string
+                    description: Description Emploi repère VNF
+                  PST_COD_RYTHME_TRAVAIL:
+                    type: string
+                    description: Code Rythme de travail
+                  PST_LIB_RYTHME_TRAVAIL:
+                    type: string
+                    description: Description Rythme de travail
+                  PST_COD_SPECIALITE:
+                    type: string
+                    description: Code Spécialité du poste
+                  PST_LIB_SPECIALITE:
+                    type: string
+                    description: Description Spécialité du poste
+                  PST_COD_CLASSE_PTETE_PME:
+                    type: string
+                    description: Code Classe PTETE/PME
+                  PST_LIB_EMPLOI_PTETE_PME:
+                    type: string
+                    description: Description Classe PTETE/PME
+                  PST_FLAG_ISH:
+                    type: string
+                    description: Indicateur ISH
+                  PST_FLAG_HEURES_SUP:
+                    type: string
+                    description: Indicateur Heures supplémentaires
+                  PST_FLAG_INCLUS_PAE:
+                    type: string
+                    description: Indicateur Inclus PAE
+                  PST_FLAG_SUJETION_ASTREINTE:
+                    type: string
+                    description: Indicateur Sujétion Astreinte
+                  PST_FLAG_VEHICULE_FONCTION:
+                    type: string
+                    description: Indicateur Véhicule de fonction ou de remisage à domicile
+                  PST_COD_FILIERE_OPA:
+                    type: string
+                    description: Code Filière (OPA)
+                  PST_LIB_FILIERE_OPA:
+                    type: string
+                    description: Description Filière (OPA)
+                  PST_COD_RME:
+                    type: string
+                    description: Code RME VNF
+                  PST_LIB_RME:
+                    type: string
+                    description: Description RME VNF
+                  PST_COD_IFSE:
+                    type: string
+                    description: Code IFSE
+                  PST_LIB_IFSE:
+                    type: string
+                    description: Description IFSE
+                  PST_COD_MAJORATION_1:
+                    type: string
+                    description: Code Majoration 1
+                  PST_LIB_MAJORATION_1:
+                    type: string
+                    description: Description Majoration 1
+                  PST_COD_MAJORATION_2:
+                    type: string
+                    description: Code Majoration 2
+                  PST_LIB_MAJORATION_2:
+                    type: string
+                    description: Description Majoration 2
+                  PST_COD_PERRENITE:
+                    type: string
+                    description: Code Pérennité du poste
+                  PST_LIB_PERRENITE:
+                    type: string
+                    description: Description Pérennité du poste
+                  PST_COD_CAT_ATTENDUE:
+                    type: string
+                    description: Code Catégorie attendue
+                  PST_LIB_CAT_ATTENDUE:
+                    type: string
+                    description: Description Catégorie attendue
+                  PST_COD_MACROGRADE_ATTENDU:
+                    type: string
+                    description: Code Macro-Grade attendu
+                  PST_LIB_MACROGRADE_ATTENDU:
+                    type: string
+                    description: Description Macro-Grade attendu
+                  PST_COD_AVANTAGE_LOGEMENT:
+                    type: string
+                    description: Code Avantage logement
+                  PST_LIB_AVANTAGE_LOGEMENT:
+                    type: string
+                    description: Description Avantage logement
+                  PST_COD_OUVRAGE:
+                    type: string
+                    description: Code Ouvrage
+                  PST_LIB_OUVRAGE:
+                    type: string
+                    description: Description Ouvrage
+                  PST_COD_OGANISATION_N1:
+                    type: string
+                    description: "Code Organisation : niveau 1"
+                  PST_LIB_OGANISATION_N1:
+                    type: string
+                    description: "Description Organisation : niveau 1"
+                  PST_COD_OGANISATION_N2:
+                    type: string
+                    description: "Code Organisation : niveau 2"
+                  PST_LIB_OGANISATION_N2:
+                    type: string
+                    description: "Description Organisation : niveau 2"
+                  PST_COD_OGANISATION_N3:
+                    type: string
+                    description: "Code Organisation : niveau 3"
+                  PST_LIB_OGANISATION_N3:
+                    type: string
+                    description: "Description Organisation : niveau 3"
+                  PST_COD_OGANISATION_N4:
+                    type: string
+                    description: "Code Organisation : niveau 4"
+                  PST_LIB_OGANISATION_N4:
+                    type: string
+                    description: "Description Organisation : niveau 4"
+                  PST_COD_OGANISATION_N5:
+                    type: string
+                    description: "Code Organisation : niveau 5"
+                  PST_LIB_OGANISATION_N5:
+                    type: string
+                    description: "Description Organisation : niveau 5"
+                  PST_COD_OGANISATION_N6:
+                    type: string
+                    description: "Code Organisation : niveau 6"
+                  PST_LIB_OGANISATION_N6:
+                    type: string
+                    description: "Description Organisation : niveau 6"
+                  PST_COD_OGANISATION_N7:
+                    type: string
+                    description: "Code Organisation : niveau 7"
+                  PST_LIB_OGANISATION_N7:
+                    type: string
+                    description: "Description Organisation : niveau 7"
+                  rowidPoste_postArrond_rowidObject:
+                    type: string
+                  rowidPoste_postOrgN7_rowidObject:
+                    type: string
+                  rowidPoste_postRythmeTravail_rowidObject:
+                    type: string
+                  rowidPoste_postEqu_rowidObject:
+                    type: string
+                  rowidPoste_postPole_rowidObject:
+                    type: string
+                  rowidPoste_postCellule_rowidObject:
+                    type: string
+                  rowidPoste_postSpec_rowidObject:
+                    type: string
+                  rowidPoste_postIsh_rowidObject:
+                    type: string
+                  rowidPoste_postHeuresSupp_rowidObject:
+                    type: string
+                  rowidPoste_postDivis_rowidObject:
+                    type: string
+                  rowidPoste_postSujAstr_rowidObject:
+                    type: string
+                  rowidPoste_postAvtgLog_rowidObject:
+                    type: string
+                  rowidPoste_postPeren_rowidObject:
+                    type: string
+                  rowidPoste_postInclPae_rowidObject:
+                    type: string
+                  rowidPoste_postMgrAtt_rowidObject:
+                    type: string
+                  rowidPoste_postDirTerr_rowidObject:
+                    type: string
+                  rowidPoste_rowidObject:
+                    type: string
+                  rowidPoste_postEmplRep_rowidObject:
+                    type: string
+                  rowidPoste_postCatAtt_rowidObject:
+                    type: string
+                  rowidPoste_postCodeRme_rowidObject:
+                    type: string
+                  rowidPoste_postVehicFonct_rowidObject:
+                    type: string
+              description: Liste des Postes Personnel  
+
+
+security: []
+tags:
+- name: Personnels
