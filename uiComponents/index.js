@@ -7,6 +7,7 @@ import Toggle from './toggle';
 import SearchBar from './searchBar';
 import Dropdown from './dropdown';
 import MultiChoice from './multiChoice';
+import UploadFile from './upload'
 
 export {
   TypingCarousel,
@@ -18,4 +19,5 @@ export {
   SearchBar,
   MultiChoice,
   RichLink,
+  UploadFile,
 };

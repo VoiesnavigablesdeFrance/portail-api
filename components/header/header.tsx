@@ -10,6 +10,7 @@ export const HEADER_PAGE = {
   SERVICES: 'services',
   GUIDES: 'guides',
   ABOUT: 'about',
+  ADDAPI: 'addapi',
 };
 
 const HEADER = [
@@ -17,6 +18,11 @@ const HEADER = [
     href: '/rechercher-api',
     txt: 'Rechercher une API du service public',
     key: HEADER_PAGE.APIS,
+  },
+  {
+    href: '/ajout-api',
+    txt: 'Ajouter une API',
+    key: HEADER_PAGE.ADDAPI,
   },
   {
     href: '/guides',

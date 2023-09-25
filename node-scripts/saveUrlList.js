@@ -40,6 +40,7 @@ async function main() {
     '/documentation',
     '/equipe',
     '/vie-privee',
+    '/ajout-api',
     ...apis.map(api => api.path),
     ...services.reduce((paths, service) => {
       if (!service.noindex) {
