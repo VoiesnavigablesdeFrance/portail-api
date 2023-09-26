@@ -1,31 +1,42 @@
-// UploadFile.js
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState } from 'react';
 
-interface UploadFileProps {
-  onUpload: (file: File) => void;
-}
-
-const UploadFile: React.FC<UploadFileProps> = ({ onUpload }) => {
+const UploadFile = ({ onUpload }: { onUpload: (file: File) => void }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    setSelectedFile(file || null);
+  const handleFileChange = (e: any) => {
+    const file = e.target.files[0];
+    setSelectedFile(file);
   };
 
-  const handleUpload = () => {
+  const handleUpload = async (e: any) => {
     if (selectedFile) {
-      // Vous pouvez effectuer ici des vérifications sur le fichier, par exemple sa taille ou son type.
-      // Ensuite, vous pouvez envoyer le fichier au serveur ou effectuer d'autres opérations avec lui.
-      onUpload(selectedFile);
-      setSelectedFile(null); // Réinitialisez le fichier sélectionné après l'upload.
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      try {
+        const response = await fetch('http://localhost:3001/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (response.ok) {
+          onUpload(selectedFile);
+          setSelectedFile(null);
+        } else {
+          console.error('Erreur lors du téléchargement du fichier');
+        }
+      } catch (error) {
+        console.error('Erreur lors du téléchargement du fichier :', error);
+      }
+    } else {
+      console.error('Aucun fichier sélectionné');
     }
   };
 
   return (
     <div>
       <input type="file" onChange={handleFileChange} />
-      <button onClick={handleUpload}>Uploader</button>
+      <button onClick={handleUpload}>Télécharger</button>
     </div>
   );
 };
