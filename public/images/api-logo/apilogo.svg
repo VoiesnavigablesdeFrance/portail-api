@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg357"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview359"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="mm"
+     showgrid="false" />
+  <defs
+     id="defs354">
+    <rect
+       x="28.460842"
+       y="385.80255"
+       width="787.41663"
+       height="259.30991"
+       id="rect425" />
+  </defs>
+  <text
+     xml:space="preserve"
+     transform="matrix(0.26458333,0,0,0.26458333,-6.6935686,3.3467843)"
+     id="text423"
+     style="font-size:133.333px;text-align:center;white-space:pre;shape-inside:url(#rect425);fill:#000000"
+     x="298.30728"
+     y="0"><tspan
+       x="148.0811"
+       y="507.44647"
+       id="tspan534"><tspan
+         style="font-weight:bold;font-family:Arial;-inkscape-font-specification:'Arial Bold'"
+         id="tspan530">api.vnf.</tspan><tspan
+         style="font-style:italic;font-family:Arial;-inkscape-font-specification:'Arial Italic'"
+         id="tspan532">fr</tspan></tspan></text>
+</svg>

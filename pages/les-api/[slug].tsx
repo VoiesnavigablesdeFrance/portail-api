@@ -29,13 +29,14 @@ import constants from '../../constants';
 import Feedback from '../../components/feedback';
 import { IDataGouvDataset, fetchDatagouvDatasets } from '../../components/api/apiOpenDataSources';
 
+import { useRouter } from 'next/router';
+
 interface IProps {
   api: IApi;
   services: IService[];
   guides: IGuideElementShort[];
   datagouvDatasets: IDataGouvDataset[];
 }
-
 const API: React.FC<IProps> = ({ api, guides, datagouvDatasets }) => {
   const {
     slug,
@@ -65,6 +66,16 @@ const API: React.FC<IProps> = ({ api, guides, datagouvDatasets }) => {
     is_france_connected,
     hide_pre_footer,
   } = api;
+
+  const router = useRouter();
+
+  const handleEditButtonClick = () => {
+    const apiJSON = JSON.stringify(api);
+    router.push({
+      pathname: '../editApi',
+      query: {apiJSON}
+    })
+  }
 
   return (
     <Page
@@ -132,6 +143,8 @@ const API: React.FC<IProps> = ({ api, guides, datagouvDatasets }) => {
             />
 
             <Partners partners={partners} />
+
+            <button onClick={handleEditButtonClick}>Modifier API</button>
           </div>
         </div>
       </div>

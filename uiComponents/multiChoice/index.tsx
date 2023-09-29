@@ -41,7 +41,7 @@ const MultiChoice: React.FC<IProps> = ({
           className={`choice ${
             choiceOptn.value === selected ? 'selected' : ''
           }`}
-          onClick={() => onClick(choiceOptn.value)}
+          onClick={() => onClick(choiceOptn.value)} // Mettez à jour la valeur lors du clic
         >
           {choiceOptn.label}
         </div>

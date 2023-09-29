@@ -16,7 +16,7 @@ export const HEADER_PAGE = {
 const HEADER = [
   {
     href: '/rechercher-api',
-    txt: 'Rechercher une API du service public',
+    txt: 'Rechercher une API VNF',
     key: HEADER_PAGE.APIS,
   },
   {
@@ -42,9 +42,9 @@ const Header = ({ headerKey = 'home' }) => {
               <div className="fr-header__brand-top">
                 <div className="fr-header__logo">
                   <p className="fr-logo">
-                    République
+                    Voies Navigables
                     <br />
-                    Française
+                    De France
                   </p>
                 </div>
                 <div className="fr-header__navbar">
@@ -63,9 +63,8 @@ const Header = ({ headerKey = 'home' }) => {
                 <a
                   className="api-logo"
                   href="/"
-                  title="Accueil - api.gouv.fr - République Française"
+                  title="Accueil - API VNF"
                 >
-                  {apiLogo}
                 </a>
               </div>
             </div>
@@ -125,6 +124,39 @@ const Header = ({ headerKey = 'home' }) => {
         a.api-logo {
           display: block;
           width: 160px;
+        }
+        .fr-logo {
+          margin-top: -60px;
+          --is-link: false;
+          display: inline-block;
+          padding: 1em;
+          font-weight: 700;
+          line-height: 1.03175em;
+          letter-spacing: -0.01em;
+          text-transform: uppercase;
+          vertical-align: middle;
+          text-indent: -0.1em;
+          color: var(--g800);
+          font-size: 1.05rem;
+          margin-bottom: -50px;
+          margin-left: -15px;
+        }
+        .fr-logo::before {
+          margin-left: -70px;
+          margin-bottom: -8.5rem;
+          background-position: 0 -0.0625rem, 0 0, 0 0;
+        }
+        .fr-logo::before {
+          display: block;
+          content: "";
+          background-repeat: no-repeat, no-repeat, no-repeat;
+          background-image: url('../images/api-logo/vnf.svg');
+          background-size: contain;
+          width: 300px;
+          height: 300px; 
+        }
+        .fr-logo::after {
+          background-image: url(none);
         }
       `}</style>
     </header>

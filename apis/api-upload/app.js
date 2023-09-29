@@ -4,11 +4,13 @@ const app = express();
 app.use(cors());
 
 const fileUploadRoute = require('./routes/uploadRoute'); // Importez votre route de téléchargement de fichiers
+const filejsonToMdRoute = require('./routes/jsonToMdRoute');
 
 app.use(express.urlencoded({extended: false}))
 app.use(express.json())
 
 app.use("/api/upload", fileUploadRoute)
+app.use("/api/jsonToMd", filejsonToMdRoute)
 // Autres configurations et routes de votre application...
 
 // Démarrage du serveur

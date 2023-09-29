@@ -31,10 +31,10 @@ const Footer = () => {
         <div className="fr-footer__body">
           <div className="fr-footer__brand fr-enlarge-link">
             <a href="/" title="Retour à l’accueil">
-              <p className="fr-logo" title="république française">
-                république
+              <p className="fr-logo" title="Voies Navigables De France">
+                Voies Navigables
                 <br />
-                française
+                De France
               </p>
             </a>
             <div className="footer__social">
@@ -224,6 +224,39 @@ const Footer = () => {
           font-weight: bold;
           font-size: 0.9rem;
           margin-right: 20px;
+        }
+        .fr-logo {
+          --is-link: false;
+          display: inline-block;
+          padding: 1em;
+          font-weight: 700;
+          line-height: 1.03175em;
+          letter-spacing: -0.01em;
+          text-transform: uppercase;
+          vertical-align: middle;
+          text-indent: -0.1em;
+          color: var(--g800);
+          font-size: 1.05rem;
+          margin-bottom: 0;
+        }
+        .fr-logo::before {
+          width: 2.75rem;
+          height: 1rem;
+          margin-bottom: -1.5rem;
+          background-size: 2.75rem 1.125rem, 2.75rem 1rem, 0;
+          background-position: 0 -0.0625rem, 0 0, 0 0;
+        }
+        .fr-logo::before {
+          display: block;
+          content: "";
+          background-repeat: no-repeat, no-repeat, no-repeat;
+          background-image: url('../images/api-logo/vnf3.svg');
+          background-size: contain;
+          width: 100px;
+          height: 100px; 
+        }
+        .fr-logo::after {
+          background-image: url(none);
         }
       `}</style>
     </footer>
