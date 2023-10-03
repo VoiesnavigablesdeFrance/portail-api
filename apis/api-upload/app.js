@@ -10,7 +10,7 @@ app.use(express.urlencoded({extended: false}))
 app.use(express.json())
 
 app.use("/api/upload", fileUploadRoute)
-app.use("/api/jsonToMd", filejsonToMdRoute)
+app.use("/api/crudApi", filejsonToMdRoute)
 // Autres configurations et routes de votre application...
 
 // Démarrage du serveur

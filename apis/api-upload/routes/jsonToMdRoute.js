@@ -3,6 +3,7 @@ const router = express.Router();
 
 const jsonToMdController = require('../controllers/jsonToMdController');
 
-router.post('/', jsonToMdController.changeJsonToMd);
+router.post('/addApi', jsonToMdController.changeJsonToMd);
+router.delete('/deleteApi',jsonToMdController.deleteApi)
 
 module.exports = router;

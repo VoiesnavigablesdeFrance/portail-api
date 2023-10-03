@@ -104,7 +104,7 @@ const Editapi: React.FC = () => {
       <div className="text-wrapper text-style">
         <h1 className="layout-center">Modifier une Api</h1>
         <div className='layout-center'>
-          <MyForm fields={fields} onSubmit={handleSubmit} apiEndpoint='http://localhost:3001/api/jsonToMd/' />
+          <MyForm fields={fields} onSubmit={handleSubmit} apiEndpoint='http://localhost:3001/api/crudApi/addApi' />
         </div>
         
       </div>

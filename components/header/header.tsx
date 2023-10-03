@@ -24,11 +24,6 @@ const HEADER = [
     txt: 'Ajouter une API',
     key: HEADER_PAGE.ADDAPI,
   },
-  {
-    href: '/guides',
-    txt: 'Comprendre les API',
-    key: HEADER_PAGE.GUIDES,
-  },
   { href: '/apropos', txt: 'À propos', key: HEADER_PAGE.ABOUT },
 ];
 
@@ -124,6 +119,9 @@ const Header = ({ headerKey = 'home' }) => {
         a.api-logo {
           display: block;
           width: 160px;
+        }
+        .fr-nav__list{
+          margin-left: 300px;
         }
         .fr-logo {
           margin-top: -60px;

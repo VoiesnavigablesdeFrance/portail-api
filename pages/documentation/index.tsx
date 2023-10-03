@@ -24,7 +24,7 @@ const Documentation: React.FC<IProps> = ({ allApis }) => {
         <div className="documentation-body text-style">
           <p>
             Bienvenue sur l’espace <b>documentation technique</b> du site{' '}
-            <a href="/apropos">api.gouv.fr</a>.
+            <a href="/apropos">api.vnf.fr</a>.
           </p>
           <p>
             Cet espace s’adresse à tous ceux - développeurs·ses, architectes,
@@ -32,18 +32,9 @@ const Documentation: React.FC<IProps> = ({ allApis }) => {
             <span role="img" aria-label="émoji ninja">
               🧙‍♀️
             </span>{' '}
-            - qui s’intéressent aux API du service public.
+            - qui s’intéressent aux API de VNF.
           </p>
-          <p>
-            Celles-ci sont développées et maintenues dans le cadre de la
-            politique d’ouverture des données, par les acteurs suivant :
-          </p>
-          <ul>
-            <li>les administrations centrales</li>
-            <li>les collectivités territoriales</li>
-            <li>les ministères</li>
-            <li>les agences gouvernementales</li>
-          </ul>
+          
           <p>
             Les API tombent dans deux grandes catégories. Les{' '}
             <b>API ouvertes</b> qui sont accessibles à tous. Et les{' '}

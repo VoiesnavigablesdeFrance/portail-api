@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 exports.changeJsonToMd = (req, res) => {
-    const json = req.body
+  const json = req.body
   const keywords = json.keywords.split(/\s+/)
   const themes = Array.isArray(json.themes) ? json.themes.join(' ') : json.themes.split(/\s+/);
   const partners = json.partners.split(/\s+/)
@@ -69,3 +69,22 @@ last_update: ${formattedDate}
     }
     )
   }
+
+  exports.deleteApi = (req, res) => {
+    const nameFile = `api-${req.body.title.replace(/\s+/g, '')}.md`;
+    const cheminFichierMd = path.join('./_data/api', nameFile);
+  
+    // Utilisez la méthode 'fs.unlink' pour supprimer le fichier.
+    fs.unlink(cheminFichierMd, (err) => {
+      if (err) {
+        return res.status(400).json({
+          message: `Une erreur s'est produite lors de la suppression du fichier Markdown ${nameFile} :`,
+          error: err,
+        });
+      } else {
+        return res.status(200).json({
+          message: `Le fichier Markdown a été supprimé avec succès.`,
+        });
+      }
+    });
+  };

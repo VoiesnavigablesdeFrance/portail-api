@@ -14,16 +14,11 @@ const Footer = () => {
                 Notre équipe
               </a>
             </div>
-            <div className="fr-col-12 fr-col-sm-3 fr-col-md-2">
+            {/*<div className="fr-col-12 fr-col-sm-3 fr-col-md-2">
               <a className="fr-footer__top-link" href="/statistiques">
                 Nos chiffres clés
               </a>
-            </div>
-            <div className="fr-col-12 fr-col-sm-3 fr-col-md-2">
-              <a className="fr-footer__top-link" href="/nouvelle-api">
-                Ajouter une API
-              </a>
-            </div>
+            </div>*/}
           </div>
         </div>
       </div>
@@ -38,7 +33,7 @@ const Footer = () => {
               </p>
             </a>
             <div className="footer__social">
-              <a href="https://twitter.com/apigouv" title="Twitter">
+              <a href="https://twitter.com/vnf_officiel" title="Twitter">
                 <img
                   src="/images/social/twitter.svg"
                   alt="Twitter"
@@ -46,7 +41,7 @@ const Footer = () => {
                 />
               </a>
               <a
-                href="https://www.linkedin.com/company/api-gouv-fr/"
+                href="https://www.linkedin.com/company/voies-navigables-de-france/"
                 title="Linkedin"
               >
                 <img
@@ -55,10 +50,10 @@ const Footer = () => {
                   className="icon icon-linkedin"
                 />
               </a>
-              <a href="https://github.com/betagouv/api.gouv.fr" title="Github">
+              <a href="http://www.facebook.com/vnf.fr" title="Facebook">
                 <img
-                  src="/images/social/github.svg"
-                  alt="Github"
+                  src="/images/social/facebook.svg"
+                  alt="Facebook"
                   className="icon icon-github"
                 />
               </a>
@@ -73,68 +68,13 @@ const Footer = () => {
           </div>
           <div className="fr-footer__content">
             <p className="fr-footer__content-desc">
-              Créé en 2016, <a href="/">api.gouv.fr</a> est le site qui
-              référence les API du service public, mises à la disposition des
-              collectivités, des ministères et des entreprises pour construire
-              des services informatiques au service de tous.
+              Créé en 2023, <a href="/">api.vnf.fr</a> est le site qui
+              référence les API de VNF, mises à la disposition pour construire
+              des services informatiques.
             </p>
-            <ul className="fr-footer__content-list">
-              <li className="fr-footer__content-item">
-                <a
-                  className="fr-footer__content-link"
-                  href="https://legifrance.gouv.fr"
-                >
-                  legifrance.gouv.fr
-                </a>
-              </li>
-              <li className="fr-footer__content-item">
-                <a
-                  className="fr-footer__content-link"
-                  href="https://gouvernement.fr"
-                >
-                  gouvernement.fr
-                </a>
-              </li>
-              <li className="fr-footer__content-item">
-                <a
-                  className="fr-footer__content-link"
-                  href="https://service-public.fr"
-                >
-                  service-public.fr
-                </a>
-              </li>
-              <li className="fr-footer__content-item">
-                <a
-                  className="fr-footer__content-link"
-                  href="https://data.gouv.fr"
-                >
-                  data.gouv.fr
-                </a>
-              </li>
-            </ul>
           </div>
         </div>
-        <div className="fr-footer__partners">
-          <h4 className="fr-footer__partners-title">Nos partenaires</h4>
-          <div>
-            <div className="fr-footer__partners-sub">
-              <ul>
-                <li>
-                  <a href="https://beta.gouv.fr/">beta.gouv.fr</a>
-                </li>
-                <li>
-                  <a href="https://www.etalab.gouv.fr/">etalab.fr</a>
-                </li>
-                <li>
-                  <a href="https://data.gouv.fr">data.gouv.fr</a>
-                </li>
-                <li>
-                  <a href="https://numerique.gouv.fr/">numerique.gouv.fr</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        
         <div className="fr-footer__bottom">
           <ul className="fr-footer__bottom-list">
             <li className="fr-footer__bottom-item">
@@ -143,21 +83,8 @@ const Footer = () => {
               </a>
             </li>
             <li className="fr-footer__bottom-item">
-              <a className="fr-footer__bottom-link" href="/vie-privee">
-                Audience & vie privée
-              </a>
-            </li>
-            <li className="fr-footer__bottom-item">
               <a className="fr-footer__bottom-link" href="/accessibilite">
                 Accessibilité : non-conforme
-              </a>
-            </li>
-            <li className="fr-footer__bottom-item">
-              <a
-                className="fr-footer__bottom-link"
-                href="https://github.com/betagouv/api.gouv.fr"
-              >
-                Code source
               </a>
             </li>
             <li className="fr-footer__bottom-item">
@@ -166,36 +93,11 @@ const Footer = () => {
               </a>
             </li>
             <li className="fr-footer__bottom-item">
-              <a
-                className="fr-footer__bottom-link"
-                href="https://beta.gouv.fr/recrutement"
-              >
-                Nous rejoindre
-              </a>
-            </li>
-            <li className="fr-footer__bottom-item">
               <a className="fr-footer__bottom-link" href="/documentation">
                 Documentation des API
               </a>
             </li>
-            <li className="fr-footer__bottom-item">
-              <a className="fr-footer__bottom-link" href="/services">
-                Réalisations
-              </a>
-            </li>
           </ul>
-          <div className="fr-footer__bottom-copy">
-            <p>
-              Sauf mention contraire, tous les textes de ce site sont sous{' '}
-              <a
-                href="https://github.com/etalab/licence-ouverte/blob/master/LO.md"
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                licence etalab-2.0
-              </a>
-            </p>
-          </div>
         </div>
       </div>
       <style jsx>{`

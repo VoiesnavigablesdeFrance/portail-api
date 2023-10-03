@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { GetStaticProps, GetStaticPaths } from 'next';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
 import {
   getAPI,
@@ -30,6 +32,7 @@ import Feedback from '../../components/feedback';
 import { IDataGouvDataset, fetchDatagouvDatasets } from '../../components/api/apiOpenDataSources';
 
 import { useRouter } from 'next/router';
+import { Alert } from '@mui/material';
 
 interface IProps {
   api: IApi;
@@ -37,6 +40,7 @@ interface IProps {
   guides: IGuideElementShort[];
   datagouvDatasets: IDataGouvDataset[];
 }
+
 const API: React.FC<IProps> = ({ api, guides, datagouvDatasets }) => {
   const {
     slug,
@@ -69,19 +73,80 @@ const API: React.FC<IProps> = ({ api, guides, datagouvDatasets }) => {
 
   const router = useRouter();
 
+  const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
+
   const handleEditButtonClick = () => {
     const apiJSON = JSON.stringify(api);
     router.push({
       pathname: '../editApi',
-      query: {apiJSON}
+      query: { apiJSON },
+    });
+  };
+
+  const [openSuccessToast, setOpenSuccessToast] = useState(false);
+  const [openErrorToast, setOpenErrorToast] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleDeleteButtonClick = () => {
+    fetch("http://localhost:3001/api/crudApi/deleteApi", {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(api),
     })
-  }
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('Réponse du serveur :', data);
+        if (data.message === "Le fichier Markdown a été supprimé avec succès.") {
+          setSuccessMessage("Le fichier Markdown a été supprimé avec succès.");
+          setOpenSuccessToast(true);
+          setErrorMessage(null);
+          router.push('/')
+        } else {
+          setErrorMessage("Erreur lors de la suppression du fichier Markdown.");
+          setOpenErrorToast(true);
+          setSuccessMessage(null);
+        }
+      })
+      .catch((error) => {
+        console.error('Erreur lors de l\'envoi des données :', error);
+        setErrorMessage("Erreur lors de l'envoi des données : " + error.message);
+        setOpenErrorToast(true);
+        setSuccessMessage(null);
+      });
+  };
+
+  const handleCloseSuccessToast = (
+    event: React.SyntheticEvent | MouseEvent,
+    reason?: string
+  ) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSuccessToast(false);
+  };
+  
+  const handleCloseErrorToast = (
+    event: React.SyntheticEvent | MouseEvent,
+    reason?: string
+  ) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenErrorToast(false);
+  };
+  
+  
 
   return (
     <Page
       headerKey={HEADER_PAGE.APIS}
       title={title}
-      description={`${title} est une des APIs du service public. ${tagline}`}
+      description={`${title} est l'une des APIs du service public. ${tagline}`}
       canonical={`https://api.gouv.fr/les-api/${slug}`}
       usePreFooter={!hide_pre_footer}
     >
@@ -145,6 +210,7 @@ const API: React.FC<IProps> = ({ api, guides, datagouvDatasets }) => {
             <Partners partners={partners} />
 
             <button onClick={handleEditButtonClick}>Modifier API</button>
+            <button onClick={handleDeleteButtonClick}>Supprimer API</button>
           </div>
         </div>
       </div>
@@ -174,12 +240,37 @@ const API: React.FC<IProps> = ({ api, guides, datagouvDatasets }) => {
           }
         }
       `}</style>
+
+      <Snackbar
+        open={openSuccessToast}
+        autoHideDuration={6000}
+      >
+        <Alert
+          onClose={handleCloseSuccessToast}
+          severity="success"
+          sx={{ width: '100%' }}
+        >
+          {successMessage}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={openErrorToast}
+        autoHideDuration={6000}
+      >
+        <Alert
+          onClose={handleCloseErrorToast}
+          severity="error"
+          sx={{ width: '100%' }}
+        >
+          {errorMessage}
+        </Alert>
+      </Snackbar>
     </Page>
   );
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // Return a list of possible value for id
   const apis = await getAllAPIs();
 
   return {
@@ -195,10 +286,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  //@ts-ignore
-  const slug = params.slug;
+  const slug = params?.slug as string;
 
-  //@ts-ignore
   const api = await getAPI(slug);
 
   const datagouvDatasets = await fetchDatagouvDatasets(api.datagouv_uuid || []);

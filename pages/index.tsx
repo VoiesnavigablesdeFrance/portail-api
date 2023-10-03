@@ -26,11 +26,6 @@ const Home: React.FC<IProps> = ({ apis }) => (
     <Baseline />
     <ExplanationSection />
     <ApiTripletSection apiList={apis} />
-    <div className="fr-container layout-center">
-      <h2>Ils ont créé de nouveaux services innovants avec des API&nbsp;:</h2>
-    </div>
-    <UseCaseSection />
-    <DLNUFSection />
 
     <style jsx>{`
       h2 {
