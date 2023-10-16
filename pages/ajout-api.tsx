@@ -1,10 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Page from '../layouts/page';
 import { HEADER_PAGE } from '../components';
 import MyForm from '../uiComponents/form';
 import  MultiChoice from '../uiComponents/multiChoice';
+import jwt from 'jsonwebtoken'
 
 const Addapi: React.FC = () => {
+
+const [pageIsVisible,setPageIsVisible] = useState(false)
+
+useEffect(()=>{
+  const token = sessionStorage.getItem('token')
+
+  if(token){
+    const decodedToken = jwt.decode(token)
+    if(typeof decodedToken !== 'string' && decodedToken && 'role' in decodedToken){
+      const role = decodedToken.role
+      if(role === "admin"){
+        setPageIsVisible(true)
+      }
+      else{
+        setPageIsVisible(false)
+      }
+    }
+  }
+  else{
+    setPageIsVisible(false)
+  }
+})
+
+
   const [statut, setStatut] = useState(1)
   const option = [
     {
@@ -37,10 +62,9 @@ const Addapi: React.FC = () => {
   
 
   const handleSubmit = (formData:any) =>{
-    console.log(formData)
   }
 
-  return (
+  return pageIsVisible ? (
     <Page
       headerKey={HEADER_PAGE.ADDAPI}
       title="Ajouter Api"
@@ -65,7 +89,7 @@ const Addapi: React.FC = () => {
         }
       `}</style>
     </Page>
-  );
+  ) : null;
 };
 
 export default Addapi;

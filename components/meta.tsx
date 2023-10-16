@@ -21,7 +21,7 @@ const Meta: React.FC<IProps> = ({
 }) => {
   description = prune(description, 160, '…');
 
-  const SITE_NAME = 'api.gouv.fr';
+  const SITE_NAME = 'api.vnf.fr';
   const SITE_URL = process.env.SITE_URL || 'https://api.gouv.fr';
   const SITE_DESCRIPTION =
     'Simplifiez le partage et la circulation des données administratives';

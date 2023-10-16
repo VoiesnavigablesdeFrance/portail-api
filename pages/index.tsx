@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { GetStaticProps } from 'next';
 import { shuffle } from 'lodash';
-
 import { getAllAPIs, IApi } from '../model';
 import Page from '../layouts/page';
 
@@ -13,16 +12,16 @@ import {
   DLNUFSection,
 } from '../components/home';
 
+
 interface IProps {
   apis: IApi[];
 }
 
 const Home: React.FC<IProps> = ({ apis }) => (
   <Page
-    title="api.gouv.fr"
-    canonical={`https://api.gouv.fr`}
-    description="Simplifiez le partage et la circulation des données administratives grace à api.gouv, le site qui référence toutes les API du service public."
-  >
+    title="api.vnf.fr"
+    canonical={`https://api.vnf.fr`}
+    >
     <Baseline />
     <ExplanationSection />
     <ApiTripletSection apiList={apis} />

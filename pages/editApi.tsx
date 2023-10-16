@@ -4,8 +4,31 @@ import { HEADER_PAGE } from '../components';
 import MyForm from '../uiComponents/form';
 import  MultiChoice from '../uiComponents/multiChoice';
 import router, { useRouter } from 'next/router'
+import jwt from 'jsonwebtoken'
 
 const Editapi: React.FC = () => {
+
+  const [pageIsVisible,setPageIsVisible] = useState(false)
+
+  useEffect(()=>{
+    const token = sessionStorage.getItem('token')
+  
+    if(token){
+      const decodedToken = jwt.decode(token)
+      if(typeof decodedToken !== 'string' && decodedToken && 'role' in decodedToken){
+        const role = decodedToken.role
+        if(role === "admin"){
+          setPageIsVisible(true)
+        }
+        else{
+          setPageIsVisible(false)
+        }
+      }
+    }
+    else{
+      setPageIsVisible(false)
+    }
+  })
 
   const router = useRouter();
 

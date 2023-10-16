@@ -3,20 +3,18 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 
-const fileUploadRoute = require('./routes/uploadRoute'); // Importez votre route de téléchargement de fichiers
-const filejsonToMdRoute = require('./routes/jsonToMdRoute');
+const fileLoginRoute = require('./routes/loginRoute');
 
 app.use(express.urlencoded({extended: false}))
 app.use(express.json())
 
-app.use("/api/upload", fileUploadRoute)
-app.use("/api/crudApi", filejsonToMdRoute)
+app.use("/api/login", fileLoginRoute);
 
 //SQL
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 
-const db = new sqlite3.Database('login.db');
+/*const db = new sqlite3.Database('login.db');
 
 // Lire le fichier SQL
 const sql = fs.readFileSync('queries.sql', 'utf8');
@@ -29,12 +27,12 @@ db.serialize(() => {
     }
 
     // Sélectionner toutes les données
-    db.all("SELECT * FROM utilisateurs", (err, rows) => {
+    db.all("SELECT * FROM users", (err, rows) => {
       if (err) {
         throw err;
       }
       rows.forEach((row) => {
-        console.log(row.id, row.nom, row.age);
+        console.log(row.id, row.user);
       });
     });
 
@@ -42,15 +40,14 @@ db.serialize(() => {
     db.close();
   });
 });
-
-
+*/
 
 
 
 
 
 // Démarrage du serveur
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 const server = app.listen(PORT, () => {
   console.log(`Serveur en cours d'exécution sur le port ${PORT}`);
 });

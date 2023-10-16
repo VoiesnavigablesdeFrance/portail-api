@@ -11,7 +11,7 @@ const About: React.FC = () => (
     headerKey={HEADER_PAGE.ABOUT}
     title="A propos"
     description="Qu’est ce qu’une API du service public ? Quelle est la mission de api.gouv.fr ? A qui s’adresse ce site ?"
-    canonical={`https://api.gouv.fr/apropos`}
+    canonical={`https://api.vnf.fr/apropos`}
   >
     <div className="text-wrapper text-style">
       <h1 className="layout-center">api.gouv.fr, à quoi ça sert ?</h1>

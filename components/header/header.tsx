@@ -1,7 +1,9 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 
 import { logCTA } from '../../utils/client/analytics';
 import { apiLogo } from './logos';
+import jwt from 'jsonwebtoken'
+
 const DATAPASS_URL =
   process.env.NEXT_PUBLIC_DATAPASS_URL || 'https://datapass.api.gouv.fr';
 
@@ -11,23 +13,65 @@ export const HEADER_PAGE = {
   GUIDES: 'guides',
   ABOUT: 'about',
   ADDAPI: 'addapi',
+  LOGIN: 'login'
 };
 
-const HEADER = [
+let headerItems = [
   {
     href: '/rechercher-api',
     txt: 'Rechercher une API VNF',
     key: HEADER_PAGE.APIS,
   },
-  {
-    href: '/ajout-api',
-    txt: 'Ajouter une API',
-    key: HEADER_PAGE.ADDAPI,
-  },
   { href: '/apropos', txt: 'À propos', key: HEADER_PAGE.ABOUT },
 ];
 
+
+
 const Header = ({ headerKey = 'home' }) => {
+  const [headerItems, setHeaderItems] = useState([
+    {
+      href: '/rechercher-api',
+      txt: 'Rechercher une API VNF',
+      key: HEADER_PAGE.APIS,
+    },
+    { href: '/apropos', txt: 'À propos', key: HEADER_PAGE.ABOUT },
+  ]);
+
+  useEffect(() => {
+    // Vérifier sessionStorage ici
+    if (sessionStorage.getItem('token')) {
+      const token = sessionStorage.getItem('token');
+      if (token) {
+        const decodedToken = jwt.decode(token);
+        if (typeof decodedToken !== 'string' && decodedToken && 'role' in decodedToken) {
+          const role = decodedToken.role;
+          if (role === "admin") {
+            setHeaderItems([
+              {
+                href: '/ajout-api',
+                txt: 'Ajouter une API',
+                key: HEADER_PAGE.ADDAPI,
+              },
+              ...headerItems // Spread des éléments précédents
+            ]);
+          }
+        }
+      }
+    }
+    
+    else {
+      setHeaderItems([
+        {
+          href: '/login',
+          txt: 'Se Connecter',
+          key: HEADER_PAGE.LOGIN,
+        },
+        ...headerItems // Spread des éléments précédents
+      ]);
+    }
+  }, []); // Le tableau vide [] assure que useEffect s'exécute une seule fois après le rendu initial
+
+
   return (
     <header role="banner" className="fr-header">
       <div className="fr-header__body">
@@ -98,7 +142,7 @@ const Header = ({ headerKey = 'home' }) => {
             aria-label="Menu principal"
           >
             <ul className="fr-nav__list">
-              {HEADER.map(item => (
+              {headerItems.map(item => (
                 <Fragment key={item.href}>
                   <li
                     className={`fr-nav__item ${

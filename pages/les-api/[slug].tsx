@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GetStaticProps, GetStaticPaths } from 'next';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import jwt from 'jsonwebtoken';
 
 import {
   getAPI,
@@ -139,8 +140,23 @@ const API: React.FC<IProps> = ({ api, guides, datagouvDatasets }) => {
     }
     setOpenErrorToast(false);
   };
-  
-  
+
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
+  useEffect(() => {
+    const token = sessionStorage.getItem('token');if (sessionStorage.getItem('token')) {
+      const token = sessionStorage.getItem('token');
+      if (token) {
+        const decodedToken = jwt.decode(token);
+        if (typeof decodedToken !== 'string' && decodedToken && 'role' in decodedToken) {
+          const role = decodedToken.role;
+          if (role === "admin") {
+            setIsAuthorized(true)
+          }
+        }
+      }
+    }
+  }, []);
 
   return (
     <Page
@@ -208,9 +224,14 @@ const API: React.FC<IProps> = ({ api, guides, datagouvDatasets }) => {
             />
 
             <Partners partners={partners} />
-
-            <button onClick={handleEditButtonClick}>Modifier API</button>
-            <button onClick={handleDeleteButtonClick}>Supprimer API</button>
+            {isAuthorized ? (
+              <>
+                <button onClick={handleEditButtonClick}>Modifier API</button>
+                <button onClick={handleDeleteButtonClick}>Supprimer API</button>
+              </>
+            ) : (
+              <div></div>
+            )}
           </div>
         </div>
       </div>
