@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import styles from './myForm.module.css'; // Importez le module CSS
 import MultiChoice from '../multiChoice';
-import Alert from '@mui/material/Alert'; // Importez le composant d'alerte
-
+import { TextField, Button, Alert } from '@mui/material';
+import { initial } from 'lodash';
 
 interface Field {
   name: string;
@@ -102,14 +102,14 @@ function MyForm({ fields, onSubmit, apiEndpoint }: MyFormProps) {
   };
 
   return (
-    <div>
-    <form onSubmit={handleSubmit} className={styles.myForm}>
+    <div> 
+    <form 
+     //onSubmit={handleSubmit} 
+     className={styles.myForm}
+     >
       {fields.map((field) => (
         field.name !== 'apiEdit' && (
         <div key={field.name} className={styles.formField}>
-          <label htmlFor={field.name} className={styles.label}>
-            {field.label} :
-          </label>
           {field.component ? (
             React.isValidElement(field.component) ? (
               <MultiChoice
@@ -118,31 +118,37 @@ function MyForm({ fields, onSubmit, apiEndpoint }: MyFormProps) {
                 multiChoiceOptions={field.component.props.multiChoiceOptions}
               />
             ) : (
-              <input
-                type={field.type}
-                id={field.name}
-                name={field.name}
-                value={formData[field.name]}
-                onChange={handleChange}
-                className={styles.input}
-              />
+              <TextField
+                    type={field.type}
+                    id={field.name}
+                    name={field.name}
+                    value={formData[field.name]}
+                    onChange={handleChange}
+                    className={styles.input}
+                    label={field.label}
+                    variant="outlined"
+                    fullWidth
+                />
             )
           ) : (
-            <input
-              type={field.type}
-              id={field.name}
-              name={field.name}
-              value={formData[field.name]}
-              onChange={handleChange}
-              className={styles.input}
-            />
+            <TextField
+                  type={field.type}
+                  id={field.name}
+                  name={field.name}
+                  value={formData[field.name]}
+                  onChange={handleChange}
+                  className={styles.input}
+                  label={field.label}
+                  variant="outlined"
+                  fullWidth
+              />
           )}
         </div>
         )
       ))}
-      <button type="submit" className={styles.submitButton} disabled={submitting}>
+      <Button type="button" variant="contained" color="primary" onClick={handleSubmit} className={styles.submitButton} disabled={submitting}>
         {submitting ? 'Envoi en cours...' : 'Soumettre'}
-      </button>
+      </Button>
     </form>
     {alert}
     </div>

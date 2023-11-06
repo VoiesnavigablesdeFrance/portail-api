@@ -72,7 +72,7 @@ useEffect(()=>{
     >
       <div className="text-wrapper text-style">
         <h1 className="layout-center">Ajouter une Api</h1>
-        <div className='layout-center'>
+        <div >
           <MyForm fields={fields} onSubmit={handleSubmit} apiEndpoint='http://localhost:3001/api/crudApi/addApi' />
         </div>
         

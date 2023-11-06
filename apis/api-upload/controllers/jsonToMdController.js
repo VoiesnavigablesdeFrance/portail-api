@@ -88,3 +88,10 @@ last_update: ${formattedDate}
       }
     });
   };
+
+
+  exports.updateApi = (req,res) => {
+    const json = req.body;
+    const title = json.oldTitle.replace(/\s+/g, '');
+    const nomFichierMd = `api-${title}.md`;
+  }

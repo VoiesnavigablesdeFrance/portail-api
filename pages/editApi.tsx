@@ -28,7 +28,7 @@ const Editapi: React.FC = () => {
     else{
       setPageIsVisible(false)
     }
-  })
+  },[])
 
   const router = useRouter();
 
@@ -115,7 +115,8 @@ const Editapi: React.FC = () => {
   
 
   const handleSubmit = (formData:any) =>{
-    console.log(formData)
+    //console.log(formData)
+    router.push('/les-api/');
   }
 
   return (
@@ -126,7 +127,7 @@ const Editapi: React.FC = () => {
     >
       <div className="text-wrapper text-style">
         <h1 className="layout-center">Modifier une Api</h1>
-        <div className='layout-center'>
+        <div >
           <MyForm fields={fields} onSubmit={handleSubmit} apiEndpoint='http://localhost:3001/api/crudApi/addApi' />
         </div>
         

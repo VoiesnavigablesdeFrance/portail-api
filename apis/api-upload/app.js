@@ -11,43 +11,7 @@ app.use(express.json())
 
 app.use("/api/upload", fileUploadRoute)
 app.use("/api/crudApi", filejsonToMdRoute)
-
-//SQL
-const sqlite3 = require('sqlite3').verbose();
-const fs = require('fs');
-
-const db = new sqlite3.Database('login.db');
-
-// Lire le fichier SQL
-const sql = fs.readFileSync('queries.sql', 'utf8');
-
-// Exécuter les requêtes SQL
-db.serialize(() => {
-  db.exec(sql, (err) => {
-    if (err) {
-      throw err;
-    }
-
-    // Sélectionner toutes les données
-    db.all("SELECT * FROM utilisateurs", (err, rows) => {
-      if (err) {
-        throw err;
-      }
-      rows.forEach((row) => {
-        console.log(row.id, row.nom, row.age);
-      });
-    });
-
-    // Fermer la base de données après avoir terminé
-    db.close();
-  });
-});
-
-
-
-
-
-
+// Autres configurations et routes de votre application...
 
 // Démarrage du serveur
 const PORT = process.env.PORT || 3001;

@@ -11,7 +11,7 @@
     "test": "jest",
     "start": "next start -p $PORT",
     "thumbnail": "node node-scripts/createThumbnail.js",
-    "build": "set NODE_ENV=production npm run sitemap && next build",
+    "build": "set NODE_ENV=production && npm run sitemap && next build",
     "lint": "next lint",
     "create-thumbnail": "node node-scripts/createThumbnail.js",
     "check-accessibility": "node ./node-scripts/checkA11y.js",
@@ -32,6 +32,7 @@
     "prettier": "^3.0.0"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.2.6",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.11",
@@ -45,6 +46,7 @@
     "@types/swagger-ui-dist": "^3.0.5",
     "@typescript-eslint/eslint-plugin": "^6.1.0",
     "@typescript-eslint/parser": "^6.1.0",
+    "antd": "^5.10.3",
     "bcrypt": "^5.1.1",
     "broken-link-checker": "^0.4.3",
     "d3": "^7.8.5",
@@ -56,6 +58,7 @@
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "markdown-to-jsx": "^7.2.1",
+    "mdb-react-ui-kit": "^6.3.0",
     "next": "^13.4.11",
     "next-seo": "^6.1.0",
     "raw-loader": "^4.0.2",

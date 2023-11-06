@@ -33,7 +33,9 @@ import Feedback from '../../components/feedback';
 import { IDataGouvDataset, fetchDatagouvDatasets } from '../../components/api/apiOpenDataSources';
 
 import { useRouter } from 'next/router';
-import { Alert } from '@mui/material';
+import { Alert, Button } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
 interface IProps {
   api: IApi;
@@ -77,6 +79,9 @@ const API: React.FC<IProps> = ({ api, guides, datagouvDatasets }) => {
   const Alert = React.forwardRef<HTMLDivElement, AlertProps>((props, ref) => {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
   });
+  
+  Alert.displayName = 'Alert'; // Ajoutez cette ligne pour définir le nom d'affichage
+  
 
   const handleEditButtonClick = () => {
     const apiJSON = JSON.stringify(api);
@@ -226,8 +231,12 @@ const API: React.FC<IProps> = ({ api, guides, datagouvDatasets }) => {
             <Partners partners={partners} />
             {isAuthorized ? (
               <>
-                <button onClick={handleEditButtonClick}>Modifier API</button>
-                <button onClick={handleDeleteButtonClick}>Supprimer API</button>
+                <Button variant="outlined" onClick={handleDeleteButtonClick} startIcon={<DeleteIcon />}>
+                  Delete
+                </Button> 
+                <Button variant="contained" onClick={handleEditButtonClick} endIcon={<EditIcon />}>
+                  Edit API
+                </Button>
               </>
             ) : (
               <div></div>
