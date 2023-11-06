@@ -6,6 +6,7 @@ external_site:
 partners:
 producer: vnf
 keywords:
+    - gains
 rate_limiting_resume: 
 rate_limiting_description: |
 themes: Environnemental  

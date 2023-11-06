@@ -1,7 +1,9 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 
 import { logCTA } from '../../utils/client/analytics';
 import { apiLogo } from './logos';
+import jwt from 'jsonwebtoken'
+
 const DATAPASS_URL =
   process.env.NEXT_PUBLIC_DATAPASS_URL || 'https://datapass.api.gouv.fr';
 
@@ -10,23 +12,66 @@ export const HEADER_PAGE = {
   SERVICES: 'services',
   GUIDES: 'guides',
   ABOUT: 'about',
+  ADDAPI: 'addapi',
+  LOGIN: 'login'
 };
 
-const HEADER = [
+let headerItems = [
   {
     href: '/rechercher-api',
-    txt: 'Rechercher une API du service public',
+    txt: 'Rechercher une API VNF',
     key: HEADER_PAGE.APIS,
-  },
-  {
-    href: '/guides',
-    txt: 'Comprendre les API',
-    key: HEADER_PAGE.GUIDES,
   },
   { href: '/apropos', txt: 'À propos', key: HEADER_PAGE.ABOUT },
 ];
 
+
+
 const Header = ({ headerKey = 'home' }) => {
+  const [headerItems, setHeaderItems] = useState([
+    {
+      href: '/rechercher-api',
+      txt: 'Rechercher une API VNF',
+      key: HEADER_PAGE.APIS,
+    },
+    { href: '/apropos', txt: 'À propos', key: HEADER_PAGE.ABOUT },
+  ]);
+
+  useEffect(() => {
+    // Vérifier sessionStorage ici
+    if (sessionStorage.getItem('token')) {
+      const token = sessionStorage.getItem('token');
+      if (token) {
+        const decodedToken = jwt.decode(token);
+        if (typeof decodedToken !== 'string' && decodedToken && 'role' in decodedToken) {
+          const role = decodedToken.role;
+          if (role === "admin") {
+            setHeaderItems([
+              {
+                href: '/ajout-api',
+                txt: 'Ajouter une API',
+                key: HEADER_PAGE.ADDAPI,
+              },
+              ...headerItems // Spread des éléments précédents
+            ]);
+          }
+        }
+      }
+    }
+    
+    else {
+      setHeaderItems([
+        {
+          href: '/login',
+          txt: 'Se Connecter',
+          key: HEADER_PAGE.LOGIN,
+        },
+        ...headerItems // Spread des éléments précédents
+      ]);
+    }
+  }, []); // Le tableau vide [] assure que useEffect s'exécute une seule fois après le rendu initial
+
+
   return (
     <header role="banner" className="fr-header">
       <div className="fr-header__body">
@@ -36,9 +81,9 @@ const Header = ({ headerKey = 'home' }) => {
               <div className="fr-header__brand-top">
                 <div className="fr-header__logo">
                   <p className="fr-logo">
-                    République
+                    Voies Navigables
                     <br />
-                    Française
+                    De France
                   </p>
                 </div>
                 <div className="fr-header__navbar">
@@ -57,9 +102,8 @@ const Header = ({ headerKey = 'home' }) => {
                 <a
                   className="api-logo"
                   href="/"
-                  title="Accueil - api.gouv.fr - République Française"
+                  title="Accueil - API VNF"
                 >
-                  {apiLogo}
                 </a>
               </div>
             </div>
@@ -98,7 +142,7 @@ const Header = ({ headerKey = 'home' }) => {
             aria-label="Menu principal"
           >
             <ul className="fr-nav__list">
-              {HEADER.map(item => (
+              {headerItems.map(item => (
                 <Fragment key={item.href}>
                   <li
                     className={`fr-nav__item ${
@@ -119,6 +163,42 @@ const Header = ({ headerKey = 'home' }) => {
         a.api-logo {
           display: block;
           width: 160px;
+        }
+        .fr-nav__list{
+          margin-left: 300px;
+        }
+        .fr-logo {
+          margin-top: -60px;
+          --is-link: false;
+          display: inline-block;
+          padding: 1em;
+          font-weight: 700;
+          line-height: 1.03175em;
+          letter-spacing: -0.01em;
+          text-transform: uppercase;
+          vertical-align: middle;
+          text-indent: -0.1em;
+          color: var(--g800);
+          font-size: 1.05rem;
+          margin-bottom: -50px;
+          margin-left: -15px;
+        }
+        .fr-logo::before {
+          margin-left: -70px;
+          margin-bottom: -8.5rem;
+          background-position: 0 -0.0625rem, 0 0, 0 0;
+        }
+        .fr-logo::before {
+          display: block;
+          content: "";
+          background-repeat: no-repeat, no-repeat, no-repeat;
+          background-image: url('../images/api-logo/vnf.svg');
+          background-size: contain;
+          width: 300px;
+          height: 300px; 
+        }
+        .fr-logo::after {
+          background-image: url(none);
         }
       `}</style>
     </header>

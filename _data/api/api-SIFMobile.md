@@ -6,6 +6,8 @@ external_site:
 partners:
 producer: vnf
 keywords:
+    - sif
+    - mobile
 rate_limiting_resume: 
 rate_limiting_description: |
 themes: Administratif  
