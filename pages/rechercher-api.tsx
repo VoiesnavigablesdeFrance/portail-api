@@ -24,7 +24,7 @@ const RechercherApi: React.FC<IProps> = ({ allApis, allThemes }) => {
     >
       <section className="fr-container page-baseline">
         <h1>
-          Vous recherchez une API du service public ? Vous êtes au bon endroit !
+          Vous recherchez une API de VNF ? Vous êtes au bon endroit !
         </h1>
       </section>
 

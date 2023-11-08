@@ -2,82 +2,93 @@ import React, { useEffect, useState } from 'react';
 import Page from '../layouts/page';
 import { HEADER_PAGE } from '../components';
 import MyForm from '../uiComponents/form';
-import  MultiChoice from '../uiComponents/multiChoice';
-import router, { useRouter } from 'next/router'
-import jwt from 'jsonwebtoken'
+import MultiChoice from '../uiComponents/multiChoice';
+import { useRouter } from 'next/router';
+import jwt from 'jsonwebtoken';
 
 const Editapi: React.FC = () => {
-
-  const [pageIsVisible,setPageIsVisible] = useState(false)
-
-  useEffect(()=>{
-    const token = sessionStorage.getItem('token')
-  
-    if(token){
-      const decodedToken = jwt.decode(token)
-      if(typeof decodedToken !== 'string' && decodedToken && 'role' in decodedToken){
-        const role = decodedToken.role
-        if(role === "admin"){
-          setPageIsVisible(true)
-        }
-        else{
-          setPageIsVisible(false)
-        }
-      }
-    }
-    else{
-      setPageIsVisible(false)
-    }
-  },[])
-
+  const [pageIsVisible, setPageIsVisible] = useState(false);
   const router = useRouter();
 
-  // Cette fonction est exécutée lorsque la page est en cours de rechargement
-  const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-    // N'oubliez pas d'ajouter un message personnalisé à la boîte de dialogue de confirmation
-    e.preventDefault();
-    e.returnValue = '';
-  };
-
-  // Écoute de l'événement beforeunload
   useEffect(() => {
-    if (!router.query.apiJSON) {
-      // Si apiJSON est vide, rediriger vers la page d'accueil
-      router.push('/les-api/');
-    }
-  }, [router.query.apiJSON]);
+    const checkUserPermissions = async () => {
+      const token = sessionStorage.getItem('token');
 
-  const [statut, setStatut] = useState(1)
+      if (token) {
+        const decodedToken = jwt.decode(token);
+        if (typeof decodedToken !== 'string' && decodedToken && 'role' in decodedToken) {
+          const role = decodedToken.role;
+          if (role === 'admin') {
+            setPageIsVisible(true);
+          } else {
+            setPageIsVisible(false);
+          }
+        }
+      } else {
+        setPageIsVisible(false);
+      }
+    };
+
+    checkUserPermissions();
+  }, []);
+
+  const [apiData, setApiData] = useState(null);
+  const apiJSON = router.query.apiJSON;
+
+  useEffect(() => {
+    if (!apiJSON) {
+      router.push('/les-api/');
+    } else if (typeof apiJSON === 'string') {
+      // Attempt to parse the API data if it's a string
+      try {
+        const parsedData = JSON.parse(apiJSON);
+        setApiData(parsedData);
+      } catch (error) {
+        console.error('JSON parsing error:', error);
+      }
+    }
+  }, [apiJSON, router]);
+
+  const [statut, setStatut] = useState(1);
   const option = [
     {
       value: 1,
-      label: 'Oui'
+      label: 'Oui',
     },
     {
       value: -1,
-      label: 'Non'
-    }
-  ]
-  const apiJSON = router.query.apiJSON ?? "";
+      label: 'Non',
+    },
+  ];
+
+  if (!apiData) {
+    return (
+      <Page headerKey={HEADER_PAGE.ADDAPI} title="Erreur de parsing JSON" description="Une erreur de parsing JSON s'est produite.">
+        <p>Une erreur de parsing JSON s'est produite. Veuillez vérifier les données JSON fournies.</p>
+      </Page>
+    );
+  }
 
   const {
-    title = "",
-    tagline = "",
-    uptime = "",
-    contact_link = "",
-    doc_tech_link = "",
-    rate_limiting_description = "",
-    rate_limiting_resume = "",
-    is_open = "",
+    title = '',
+    tagline = '',
+    uptime = '',
+    contact_link = '',
+    doc_tech_link = '',
+    rate_limiting_description = '',
+    rate_limiting_resume = '',
+    is_open = '',
     partners = [],
-    content_intro = "",
+    content_intro = '',
     keywords = [],
-    producer = "",
-    external_site = "",
-    visits_2019 = "",
-    themes = "",
-    last_update = "",
-  } = typeof apiJSON === 'string' ? JSON.parse(apiJSON) : {};
+    producer = '',
+    external_site = '',
+    visits_2019 = '',
+    themes = '',
+    last_update = '',
+} = typeof apiJSON === 'string' ? JSON.parse(apiJSON) : {};
+
+const myTitle = title!;
 
   let dateInit:string = "";
   const themes2 = Array.isArray(themes) ? themes.join(' ') : themes.split(/\s+/);
@@ -127,10 +138,13 @@ const Editapi: React.FC = () => {
     >
       <div className="text-wrapper text-style">
         <h1 className="layout-center">Modifier une Api</h1>
-        <div >
-          <MyForm fields={fields} onSubmit={handleSubmit} apiEndpoint='http://localhost:3001/api/crudApi/addApi' />
+        <div>
+          <MyForm
+            fields={fields}
+            onSubmit={handleSubmit}
+            apiEndpoint="http://localhost:3001/api/crudApi/addApi"
+          />
         </div>
-        
       </div>
       <style jsx>{`
         .text-wrapper > div {

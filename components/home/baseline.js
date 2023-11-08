@@ -12,15 +12,14 @@ const Baseline = () => (
       <TypingCarousel
         txtBefore="Vous êtes"
         sentences={[
-          ' une collectivité ?',
-          ' un ministère ?',
-          ' une entreprise ?',
+          ' une direction de VNF ?',
+          ' un prestataire ?',
+          ' un partenaire ?',
         ]}
       />
     </h1>
     <h2>
-      Accédez aux données de toutes les administrations, pour construire des
-      services innovants.
+    Accédez aux données de Voies navigables de France (VNF), pour construire des services innovants.
     </h2>
     <ButtonLink href="/rechercher-api" size="large">
       <span className="layout-center">

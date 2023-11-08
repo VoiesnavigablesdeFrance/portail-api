@@ -9,7 +9,7 @@
     "sitemap": "node node-scripts/saveUrlList.js && node ./node_modules/sitemap/dist/cli.js < ./public/url-list.txt > ./public/sitemap.xml",
     "dev": "set NODE_ENV=development && concurrently \"npm run start-app\" \"npm run start-api-upload\" \"npm run start-api-login\"",
     "test": "jest",
-    "start": "next start -p $PORT",
+    "start": "concurrently \"next start\" \"npm run start-api-upload\" \"npm run start-api-login\"",
     "thumbnail": "node node-scripts/createThumbnail.js",
     "build": "set NODE_ENV=production && npm run sitemap && next build",
     "lint": "next lint",
