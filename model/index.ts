@@ -32,6 +32,7 @@ export interface IRoadmap {
 }
 
 export interface IGuideElementShort {
+  linkSite: string;
   title: string;
   slug: string;
   image: string | null;

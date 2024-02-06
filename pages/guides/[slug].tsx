@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { GetStaticProps, GetStaticPaths } from 'next';
 
 import {
@@ -15,6 +15,7 @@ import constants from '../../constants';
 import { RichLink } from '../../uiComponents';
 import Share from '../../uiComponents/share';
 import Feedback from '../../components/feedback';
+import router from 'next/router';
 
 interface IProps {
   guide: IGuideElement;
@@ -35,6 +36,7 @@ const computeRelatedGuides = async (guide: IGuideElement) => {
 
 const Guide: React.FC<IProps> = ({ guide, related_guides }) => {
   const { title, slug, tagline, body, image, noindex = false } = guide;
+
   return (
     <Page
       headerKey={HEADER_PAGE.APIS}
@@ -52,6 +54,7 @@ const Guide: React.FC<IProps> = ({ guide, related_guides }) => {
           </div>
         </div>
         <div className="text-style text-wrapper">
+          <a href={guide.linkSite}>Lien vers {title}</a>
           <Share title={title} href={`https://api.gouv.fr/guides/${slug}`} />
           <RichReactMarkdown source={body} />
         </div>

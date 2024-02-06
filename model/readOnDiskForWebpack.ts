@@ -92,6 +92,7 @@ const loadApis = async (): Promise<{ [key: string]: IApi }> => {
     const formatter = formatApiWithOwner(Object.values(producers));
 
     store.apis = await parseMarkdown(apiFolderContext, formatter);
+    //console.log(store.apis)
   }
   return store.apis;
 };

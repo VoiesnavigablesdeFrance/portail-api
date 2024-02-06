@@ -1,6 +1,6 @@
 import React from 'react';
 import { flatten, uniq } from 'lodash';
-import { GetStaticProps } from 'next';
+import { GetServerSideProps, GetStaticProps } from 'next';
 
 import { getAllAPIs, IApi } from '../model';
 import Page from '../layouts/page';
@@ -19,8 +19,8 @@ const RechercherApi: React.FC<IProps> = ({ allApis, allThemes }) => {
     <Page
       headerKey={HEADER_PAGE.APIS}
       preFooterBackground={constants.colors.white}
-      title="Rechercher une API du service public"
-      description="Vous faites partie d'un ministère ou d'une collectivité et vous cherchez une API du service public ? Vous êtes au bon endroit."
+      title="Rechercher une API de VNF"
+      description="Vous cherchez une API de VNF ? Vous êtes au bon endroit."
     >
       <section className="fr-container page-baseline">
         <h1>
@@ -33,33 +33,69 @@ const RechercherApi: React.FC<IProps> = ({ allApis, allThemes }) => {
   );
 };
 
-export const getStaticProps: GetStaticProps = async () => {
-  const allApis = await getAllAPIs();
+export async function getStaticProps() {
+  try {
+    const allApis = await getAllAPIs();
 
-  const allThemes = uniq(
-    flatten(
-      allApis.map(api => {
-        // this must be tested with JEST first, but one never knows
-        if (!api.themes) {
-          throw new Error(`API must have at least one theme : ${api.slug}`);
-        }
-        return api.themes;
-      })
-    )
-  ).sort();
+    const allThemes = uniq(
+      flatten(
+        allApis.map(api => {
+          if (!api.themes) {
+            throw new Error(`API must have at least one theme : ${api.slug}`);
+          }
+          return api.themes;
+        })
+      )
+    ).sort();
 
-  const sortedAllApis = allApis.sort((a, b) =>
-    (a.visits_2019 || 0) < (b.visits_2019 || 0) ? 1 : -1
-  );
+    //console.log('allApis:', allApis);
+    //console.log('allThemes:', allThemes);
 
-  const filteredAllApis = sortedAllApis.filter(filterExceptions());
+    return {
+      props: {
+        allApis,
+        allThemes,
+      },
+    };
+  } catch (error: any) {
+    console.error('Error in getStaticProps:', error.message);
+    return {
+      props: {
+        allApis: [],
+        allThemes: [],
+      },
+    };
+  }
+}
 
-  return {
-    props: {
-      allApis: filteredAllApis,
-      allThemes,
-    },
-  };
-};
+
+  /*export const getServerSideProps: GetServerSideProps<IProps> = async () => {
+    const allApis = await getAllAPIs();
+  
+    const allThemes = uniq(
+      flatten(
+        allApis.map(api => {
+          if (!api.themes) {
+            throw new Error(`API must have at least one theme : ${api.slug}`);
+          }
+          return api.themes;
+        })
+      )
+    ).sort();
+  
+    const sortedAllApis = allApis.sort((a, b) =>
+      (a.visits_2019 || 0) < (b.visits_2019 || 0) ? 1 : -1
+    );
+  
+    const filteredAllApis = sortedAllApis.filter(filterExceptions());
+  
+    return {
+      props: {
+        allApis: filteredAllApis,
+        allThemes,
+        revalidate: 0,
+      },
+    };
+  };*/
 
 export default RechercherApi;

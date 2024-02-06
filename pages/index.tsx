@@ -34,7 +34,7 @@ const Home: React.FC<IProps> = ({ apis }) => (
   </Page>
 );
 
-export const getStaticProps: GetStaticProps = async () => {
+/*export const getStaticProps: GetStaticProps = async () => {
   const apiList = await getAllAPIs();
 
   const mostInterestingApis = apiList
@@ -50,6 +50,22 @@ export const getStaticProps: GetStaticProps = async () => {
   return {
     props: refreshList(),
   };
+};*/
+
+export const getServerSideProps = async () => {
+  const apiList = await getAllAPIs();
+
+  const mostInterestingApis = apiList
+    .sort((a, b) => ((a.visits_2019 || 0) > (b.visits_2019 || 0) ? -1 : 1))
+    .slice(0, 15);
+
+  const refreshList = () => ({
+    props: {
+      apis: shuffle(mostInterestingApis).slice(0, 3),
+    },
+  });
+
+  return refreshList();
 };
 
 export default Home;

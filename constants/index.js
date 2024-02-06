@@ -20,7 +20,7 @@ export default {
     vividBlue: '#0000b1',
     lightBlue: '#e5e5f4',
     lightestBlue: '#f8faff',
-    backgroundBlueGradient: 'linear-gradient(45deg, #003189, #005adf)',
+    backgroundBlueGradient: 'linear-gradient(45deg, #143477, #3155A4)',
     red: '#dc3545',
     green: '#17bd3d',
     lightOrange: '#fff4d1',

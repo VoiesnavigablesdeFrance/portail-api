@@ -8,14 +8,16 @@ producer: vnf
 keywords:
   - adresse
   - gouvernement
-rate_limiting_resume: 
-rate_limiting_description: |
+rate_limiting_resume: Limite de 20 appels /secondes
+rate_limiting_description: | 
+  L'API est disponible à hauteur de 20 appels par secondes et par jeton d'accès.
 themes: Géographie
 content_intro: | 
+  description de l'api adresse
    
-contact_link: 
+contact_link: vnf@vnf.fr
 doc_tech_link: /yaml/adresse.yaml
-doc_tech_external: 
+doc_tech_external:
 uptime: 100
 visits_2019: 
 last_update: 
@@ -23,7 +25,15 @@ last_update:
 
 *Encapsulation de l'API Adresse du gouvernement*. \
 https://adresse.data.gouv.fr/api-doc/adresse
----
+
+
+### A quoi ça sert ?
+
+### Les données disponibles via l'API
+
+Schéma de fonctionnement de FranceConnect pour test d'image :
+![test d'image](/images/divers/franceConnect.png)
+
 
 ### <font color=#28005F>L'API est composée des routes suivantes :</font>
 ---------

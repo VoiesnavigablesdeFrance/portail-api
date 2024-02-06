@@ -1,5 +1,5 @@
 ---
-title: GEDElise
+title: API GED
 tagline: Cette API permet les échanges avec le service GED Elise
 is_open: 1
 external_site: 
@@ -12,16 +12,13 @@ rate_limiting_resume:
 rate_limiting_description: |
 themes: Administratif  
 content_intro: | 
-   
+   Les APIs GED permettent aux applications VNF d’utiliser des services de gestion de document
 contact_link: 
 doc_tech_link: /yaml/GEDElise.yaml
 doc_tech_external: 
 uptime: 100
 visits_2019: 
 last_update: 
----
-*Cette API permet les échanges avec le service GED Elise*.
-
 ---
 
 ### <font color=#28005F>L'API est composée des routes suivantes :</font>

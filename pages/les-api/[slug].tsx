@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GetStaticProps, GetStaticPaths } from 'next';
+import { GetStaticProps, GetStaticPaths, GetServerSidePropsContext, GetServerSideProps } from 'next';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import jwt from 'jsonwebtoken';
@@ -188,11 +188,6 @@ const API: React.FC<IProps> = ({ api, guides, datagouvDatasets }) => {
               body={body}
               content_intro={content_intro}
             />
-
-            {datagouvDatasets.length > 0 && (
-              <ApiOpenDataSources datasetsList={datagouvDatasets} />
-            )}
-
             <Feedback />
           </div>
           <div className="right-column info-column">
@@ -300,7 +295,7 @@ const API: React.FC<IProps> = ({ api, guides, datagouvDatasets }) => {
   );
 };
 
-export const getStaticPaths: GetStaticPaths = async () => {
+/*export const getStaticPaths: GetStaticPaths = async () => {
   const apis = await getAllAPIs();
 
   return {
@@ -338,6 +333,33 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     });
 
   return { props: { api, services, guides, datagouvDatasets } };
-};
+};*/
+
+export const getServerSideProps: GetServerSideProps = async (
+  context: GetServerSidePropsContext
+)=> {
+  const slug = context.params?.slug as string;
+
+  const api = await getAPI(slug);
+
+  const datagouvDatasets = await fetchDatagouvDatasets(api.datagouv_uuid || []);
+
+  const allServices = await getAllServices();
+  const services = allServices.filter(service => {
+    return service.api.indexOf(api.title) > -1;
+  });
+
+  const allGuides = await getAllGuides();
+  const guides = allGuides
+    .filter(guide => {
+      return guide.api && guide.api.indexOf(api.title) > -1;
+    })
+    .map(guide => {
+      const { title, slug, image = null } = guide;
+      return { title, slug, image };
+    });
+
+  return { props: { api, services, guides, datagouvDatasets } };
+}
 
 export default API;

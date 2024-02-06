@@ -25,7 +25,7 @@ last_update:
 
 ### <font color=#28005F>L'API est composée des routes suivantes :</font>
 ---------
-1. Récupération des offres d'emploi  
+1. Récupération des offres d'emploi
 2. Récupération des catégories professionnelles
 3. Récupération des familles professionnelles
 4. Récupération des types de contrat 

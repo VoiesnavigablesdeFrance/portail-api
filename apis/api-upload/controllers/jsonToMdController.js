@@ -90,8 +90,8 @@ last_update: ${formattedDate}
   };
 
 
-  exports.updateApi = (req,res) => {
+  exports.updateApi = (req,res) => {  
     const json = req.body;
-    const title = json.oldTitle.replace(/\s+/g, '');
-    const nomFichierMd = `api-${title}.md`;
+    const oldTitle = json.oldTitle.replace(/\s+/g, '');
+    const oldNomFichierMd = `api-${oldTitle}.md`;
   }
